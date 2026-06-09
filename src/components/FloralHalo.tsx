@@ -45,13 +45,10 @@ function FloralHalo({
 }: FloralHaloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [isMobileHalo, setIsMobileHalo] = useState(false);
   const rawTiltX = useMotionValue(0);
   const rawTiltY = useMotionValue(0);
   const tiltX = useSpring(rawTiltX, { stiffness: 80, damping: 24 });
   const tiltY = useSpring(rawTiltY, { stiffness: 80, damping: 24 });
-  const reduceMotion = isMobileHalo;
-  const animationsPaused = isPaused || reduceMotion;
   const rotationSpeed = isHovered ? 9.6 : 18; // seconds per full rotation
   const waveControls = useAnimationControls();
   const outerControls = useAnimationControls();
@@ -60,21 +57,11 @@ function FloralHalo({
   const compassControls = useAnimationControls();
 
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
-    const updateMobileState = () => setIsMobileHalo(query.matches);
-
-    updateMobileState();
-    query.addEventListener("change", updateMobileState);
-
-    return () => query.removeEventListener("change", updateMobileState);
-  }, []);
-
-  useEffect(() => {
     let frame: number | null = null;
     let latestPointer = { x: 0, y: 0 };
 
     const updateTilt = () => {
-      if (!containerRef.current || animationsPaused) return;
+      if (!containerRef.current || isPaused) return;
 
       const rect = containerRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -101,7 +88,7 @@ function FloralHalo({
       });
     };
 
-    if (animationsPaused) {
+    if (isPaused) {
       rawTiltX.set(0);
       rawTiltY.set(0);
       return;
@@ -115,10 +102,10 @@ function FloralHalo({
         window.cancelAnimationFrame(frame);
       }
     };
-  }, [animationsPaused, rawTiltX, rawTiltY]);
+  }, [isPaused, rawTiltX, rawTiltY]);
 
   useEffect(() => {
-    if (animationsPaused) {
+    if (isPaused) {
       waveControls.stop();
       outerControls.stop();
       innerControls.stop();
@@ -171,7 +158,7 @@ function FloralHalo({
     compassControls,
     coreControls,
     innerControls,
-    animationsPaused,
+    isPaused,
     outerControls,
     rotationSpeed,
     waveControls,
@@ -181,7 +168,7 @@ function FloralHalo({
     <div 
       ref={containerRef}
       onMouseEnter={() => {
-        if (!animationsPaused) setIsHovered(true);
+        if (!isPaused) setIsHovered(true);
       }}
       onMouseLeave={() => setIsHovered(false)}
       className={`relative select-none pointer-events-auto flex items-center justify-center ${className}`}
@@ -194,27 +181,23 @@ function FloralHalo({
       {/* ========================================================== */}
       
       {/* Intense vertical light bars / columns of pink and white - screen mix mode */}
-      {!reduceMotion && (
-        <>
-          <div className="absolute inset-y-[-600px] left-1/2 -translate-x-1/2 w-[240px] bg-gradient-to-b from-transparent via-[var(--theme-hot)]/45 to-transparent filter blur-[100px] pointer-events-none mix-blend-screen" />
-          <div className="absolute inset-y-[-600px] left-[40%] w-[90px] bg-gradient-to-b from-transparent via-[var(--theme-hot)]/35 to-transparent filter blur-[80px] pointer-events-none mix-blend-screen animate-pulse" />
-          <div className="absolute inset-y-[-600px] left-[60%] w-[70px] bg-gradient-to-b from-transparent via-white/20 to-transparent filter blur-[60px] pointer-events-none mix-blend-screen" />
-          
-          {/* Pure white intense key light beam down the center */}
-          <div className="absolute inset-y-[-500px] left-1/2 -translate-x-1/2 w-[12px] bg-gradient-to-b from-transparent via-white/50 to-transparent filter blur-[6px] pointer-events-none mix-blend-screen" />
-          <div className="absolute inset-y-[-500px] left-1/2 -translate-x-1/2 w-[3px] bg-gradient-to-b from-transparent via-white to-transparent filter blur-[1px] pointer-events-none mix-blend-screen" />
+      <div className="absolute inset-y-[-600px] left-1/2 -translate-x-1/2 w-[240px] bg-gradient-to-b from-transparent via-[var(--theme-hot)]/45 to-transparent filter blur-[100px] pointer-events-none mix-blend-screen" />
+      <div className="absolute inset-y-[-600px] left-[40%] w-[90px] bg-gradient-to-b from-transparent via-[var(--theme-hot)]/35 to-transparent filter blur-[80px] pointer-events-none mix-blend-screen animate-pulse" />
+      <div className="absolute inset-y-[-600px] left-[60%] w-[70px] bg-gradient-to-b from-transparent via-white/20 to-transparent filter blur-[60px] pointer-events-none mix-blend-screen" />
+      
+      {/* Pure white intense key light beam down the center */}
+      <div className="absolute inset-y-[-500px] left-1/2 -translate-x-1/2 w-[12px] bg-gradient-to-b from-transparent via-white/50 to-transparent filter blur-[6px] pointer-events-none mix-blend-screen" />
+      <div className="absolute inset-y-[-500px] left-1/2 -translate-x-1/2 w-[3px] bg-gradient-to-b from-transparent via-white to-transparent filter blur-[1px] pointer-events-none mix-blend-screen" />
 
-          {/* Horizontal glowing pink/white flare */}
-          <div className="absolute inset-x-[-350px] top-1/2 -translate-y-1/2 h-[60px] bg-gradient-to-r from-transparent via-[var(--theme-hot)]/40 to-transparent filter blur-[70px] pointer-events-none mix-blend-screen" />
-          <div className="absolute inset-x-[-200px] top-1/2 -translate-y-1/2 h-[8px] bg-gradient-to-r from-transparent via-white/35 to-transparent filter blur-[10px] pointer-events-none mix-blend-screen" />
+      {/* Horizontal glowing pink/white flare */}
+      <div className="absolute inset-x-[-350px] top-1/2 -translate-y-1/2 h-[60px] bg-gradient-to-r from-transparent via-[var(--theme-hot)]/40 to-transparent filter blur-[70px] pointer-events-none mix-blend-screen" />
+      <div className="absolute inset-x-[-200px] top-1/2 -translate-y-1/2 h-[8px] bg-gradient-to-r from-transparent via-white/35 to-transparent filter blur-[10px] pointer-events-none mix-blend-screen" />
 
-          {/* Extreme pink blooming vignette cloud centered on the graphic */}
-          <div className="absolute w-[640px] h-[640px] bg-[var(--theme-hot)]/25 rounded-full filter blur-[120px] pointer-events-none mix-blend-screen" />
-          <div className="absolute w-[360px] h-[360px] bg-white/10 rounded-full filter blur-[60px] pointer-events-none mix-blend-screen" />
-        </>
-      )}
+      {/* Extreme pink blooming vignette cloud centered on the graphic */}
+      <div className="absolute w-[640px] h-[640px] bg-[var(--theme-hot)]/25 rounded-full filter blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute w-[360px] h-[360px] bg-white/10 rounded-full filter blur-[60px] pointer-events-none mix-blend-screen" />
 
-      {playIntro && !reduceMotion && (
+      {playIntro && (
         <div className="absolute inset-0 pointer-events-none z-30 flex flex-col justify-stretch overflow-hidden">
           {[...Array(30)].map((_, idx) => (
             <motion.div
@@ -236,7 +219,7 @@ function FloralHalo({
       {/* Interaction Stage */}
       <motion.div
         animate={{
-          scale: isHovered && !animationsPaused ? 1.04 : 1.0,
+          scale: isHovered && !isPaused ? 1.04 : 1.0,
         }}
         style={{
           rotateX: tiltX,
@@ -247,29 +230,23 @@ function FloralHalo({
         className="w-[580px] h-[580px] flex items-center justify-center relative cursor-pointer"
       >
         {/* Soft glowing background center aura */}
-        {!reduceMotion && (
-          <div className={`absolute w-[400px] h-[400px] bg-[var(--theme-hot)]/20 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'}`} />
-        )}
+        <div className={`absolute w-[400px] h-[400px] bg-[var(--theme-hot)]/20 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'}`} />
 
         {/* ========================================================== */}
         {/* SPECULAR LIGHT OVERLAYS (NO BLACK AT ALL - SHIFTS DYNAMICALLY OVER ROTATING ARTWORK) */}
         {/* ========================================================== */}
-        {!reduceMotion && (
-          <>
-            <div 
-              className="absolute w-[520px] h-[520px] rounded-full pointer-events-none mix-blend-color-dodge opacity-90 select-none z-20 pointer-events-none"
-              style={{
-                background: "radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95) 0%, rgba(var(--theme-rgb), 0.3) 35%, rgba(var(--theme-light-rgb), 0) 70%)"
-              }}
-            />
-            <div 
-              className="absolute w-[520px] h-[520px] rounded-full pointer-events-none mix-blend-overlay opacity-60 select-none z-25 pointer-events-none"
-              style={{
-                background: "radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.9) 0%, rgba(var(--theme-rgb), 0.15) 50%, rgba(255, 255, 255, 0) 80%)"
-              }}
-            />
-          </>
-        )}
+        <div 
+          className="absolute w-[520px] h-[520px] rounded-full pointer-events-none mix-blend-color-dodge opacity-90 select-none z-20 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95) 0%, rgba(var(--theme-rgb), 0.3) 35%, rgba(var(--theme-light-rgb), 0) 70%)"
+          }}
+        />
+        <div 
+          className="absolute w-[520px] h-[520px] rounded-full pointer-events-none mix-blend-overlay opacity-60 select-none z-25 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.9) 0%, rgba(var(--theme-rgb), 0.15) 50%, rgba(255, 255, 255, 0) 80%)"
+          }}
+        />
 
         <ThemedSvgLayer
           animate={waveControls}
