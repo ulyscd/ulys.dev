@@ -598,9 +598,9 @@ export default function App() {
                   exit={{ x: "100%" }}
                   transition={{ type: "spring", stiffness: 180, damping: 28 }}
                   data-testid="extended-article-view"
-                  className="fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 border-l border-[var(--theme-hot)]/25 bg-white/95 shadow-[-24px_0_80px_rgba(var(--theme-rgb),0.24)] backdrop-blur-2xl flex flex-col"
+                  className="liquid-glass-panel fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 flex flex-col"
                 >
-                  <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-4 py-3">
+                  <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
                     <div>
                       <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
                         extended_article_view
@@ -624,7 +624,7 @@ export default function App() {
                   <iframe
                     src={getPdfViewerUrl(activeComposition.articleUrl)}
                     title={`${activeComposition.title} extended article`}
-                    className="min-h-0 flex-1 w-full bg-white"
+                    className="relative z-10 min-h-0 flex-1 w-full bg-white/90"
                   />
                 </motion.div>
               )}
@@ -639,9 +639,9 @@ export default function App() {
                     exit={{ x: "100%" }}
                     transition={{ type: "spring", stiffness: 180, damping: 28 }}
                     data-testid="extended-fish-timeline-view"
-                    className="fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 border-l border-[var(--theme-hot)]/25 bg-white/95 shadow-[-24px_0_80px_rgba(var(--theme-rgb),0.24)] backdrop-blur-2xl flex flex-col"
+                    className="liquid-glass-panel fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 flex flex-col"
                   >
-                    <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-4 py-3">
+                    <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
                       <div>
                         <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
                           extended_fish_timeline
@@ -659,7 +659,7 @@ export default function App() {
                         <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <div className="min-h-0 flex-1 p-3 md:p-4">
+                    <div className="liquid-glass-body relative z-10 min-h-0 flex-1 p-3 md:p-4">
                       <FishTimeline variant="extended" />
                     </div>
                   </motion.div>
