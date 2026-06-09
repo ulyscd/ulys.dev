@@ -40,8 +40,6 @@ const SOCIAL_LINKS = [
 const getPdfViewerUrl = (url: string) =>
   `${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`;
 
-const introSoundUrl = `${import.meta.env.BASE_URL}audio/intro.mp3`;
-
 export default function App() {
   // Global States
   const [loading, setLoading] = useState(true);
@@ -80,39 +78,6 @@ export default function App() {
       });
     }, 80);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const audio = new Audio(introSoundUrl);
-    audio.volume = 0.75;
-    audio.preload = "auto";
-
-    let shouldRetryOnInteraction = true;
-
-    const playIntroSound = () => {
-      audio.currentTime = 0;
-      audio.play().then(() => {
-        shouldRetryOnInteraction = false;
-      }).catch(() => {
-        shouldRetryOnInteraction = true;
-      });
-    };
-
-    const handleInteraction = () => {
-      if (!shouldRetryOnInteraction) return;
-      playIntroSound();
-    };
-
-    playIntroSound();
-    window.addEventListener("pointerdown", handleInteraction, { once: true });
-    window.addEventListener("keydown", handleInteraction, { once: true });
-
-    return () => {
-      shouldRetryOnInteraction = false;
-      window.removeEventListener("pointerdown", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-      audio.pause();
-    };
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
