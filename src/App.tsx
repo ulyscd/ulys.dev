@@ -526,7 +526,7 @@ export default function App() {
                     <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden text-center">
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center [font-family:var(--font-ascii)] text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
+                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center font-mono text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
                       >
                         {selectCenterBorderAscii}
                       </pre>
