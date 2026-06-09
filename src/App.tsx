@@ -12,6 +12,9 @@ import PetalRain from "./components/PetalRain";
 import PixelGrid from "./components/PixelGrid";
 import BottomRightAsciiArt from "./components/BottomRightAsciiArt";
 import FishTimeline from "./components/FishTimeline";
+import selectCenterBorderAscii from "./assets/select-center-border-ascii.txt?raw";
+import selectLeftAscii from "./assets/select-left-ascii.txt?raw";
+import selectWindowAscii from "./assets/select-window-ascii.txt?raw";
 import githubIcon from "../assets/social/github.webp";
 import instagramIcon from "../assets/social/insta.webp";
 import linkedinIcon from "../assets/social/linkedin.webp";
@@ -515,13 +518,31 @@ export default function App() {
                       </div>
                     )
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                      <div className="w-8 h-8 rounded-full border border-dashed border-[var(--theme-hot)]/40 flex items-center justify-center animate-spin duration-3000 mb-3">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden text-center">
+                      <pre
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center font-mono text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
+                      >
+                        {selectCenterBorderAscii}
+                      </pre>
+                      <div className="absolute left-1/2 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-dashed border-[var(--theme-hot)]/40 animate-spin duration-3000">
                         <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full" />
                       </div>
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/60">
+                      <p className="absolute left-1/2 bottom-[10%] z-10 -translate-x-1/2 font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/60">
                         select something
                       </p>
+                      <pre
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -bottom-[1px] right-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-right font-mono text-[1.35px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[1.65px] md:right-8 md:text-[1.95px]"
+                      >
+                        {selectWindowAscii.trimEnd()}
+                      </pre>
+                      <pre
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -bottom-[1px] left-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-left font-mono text-[2.025px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[2.475px] md:left-8 md:text-[2.925px]"
+                      >
+                        {selectLeftAscii.trimEnd()}
+                      </pre>
                     </div>
                   )}
 

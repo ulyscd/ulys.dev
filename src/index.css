@@ -20,8 +20,8 @@
 }
 
 .theme-green {
-  --theme-hot: #99b36c;
-  --theme-rgb: 153, 179, 108;
+  --theme-hot: #86a45c;
+  --theme-rgb: 134, 164, 92;
   --theme-light: #f4f8ed;
   --theme-light-rgb: 244, 248, 237;
   --theme-icon-filter: hue-rotate(109deg) saturate(48%);
