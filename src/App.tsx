@@ -81,6 +81,8 @@ export default function App() {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (showCompositions) return;
+
     latestPointer.current = {
       x: e.clientX,
       y: e.clientY,
@@ -147,43 +149,45 @@ export default function App() {
         <PixelGrid />
 
         {/* Floating Petal Rain simulator */}
-        <PetalRain />
+        {!showCompositions && <PetalRain />}
 
         {/* Ambient Pulsing Light Leaks (reactive to the graphics on the left edge) */}
-        <div className="absolute inset-y-0 left-0 w-1/2 pointer-events-none select-none z-0 overflow-hidden">
-          {/* Soft infinite radial hot pink bloom */}
-          <motion.div
-            animate={{
-              scale: [1, 1.15, 0.95, 1.05, 1],
-              opacity: [0.35, 0.5, 0.3, 0.45, 0.35],
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute left-[-200px] top-[10%] w-[584px] h-[584px] rounded-full glow-leak pointer-events-none"
-          />
-          <motion.div
-            animate={{
-              scale: [1, 0.9, 1.1, 1],
-              opacity: [0.25, 0.4, 0.2, 0.25],
-            }}
-            transition={{
-              duration: 16,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-            className="absolute left-[-150px] bottom-[15%] w-[480px] h-[480px] rounded-full glow-leak pointer-events-none"
-          />
+        {!showCompositions && (
+          <div className="absolute inset-y-0 left-0 w-1/2 pointer-events-none select-none z-0 overflow-hidden">
+            {/* Soft infinite radial hot pink bloom */}
+            <motion.div
+              animate={{
+                scale: [1, 1.15, 0.95, 1.05, 1],
+                opacity: [0.35, 0.5, 0.3, 0.45, 0.35],
+              }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute left-[-200px] top-[10%] w-[584px] h-[584px] rounded-full glow-leak pointer-events-none"
+            />
+            <motion.div
+              animate={{
+                scale: [1, 0.9, 1.1, 1],
+                opacity: [0.25, 0.4, 0.2, 0.25],
+              }}
+              transition={{
+                duration: 16,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 2,
+              }}
+              className="absolute left-[-150px] bottom-[15%] w-[480px] h-[480px] rounded-full glow-leak pointer-events-none"
+            />
 
-          {/* Dynamic Light leaks responding gently to cursor */}
-          <motion.div
-            className="absolute w-[450px] h-[450px] rounded-full glow-leak-bright pointer-events-none transition-all duration-1000 ease-out"
-            style={{
-              x: lightLeakX,
-              y: lightLeakY,
-              opacity: 0.4,
-            }}
-          />
-        </div>
+            {/* Dynamic Light leaks responding gently to cursor */}
+            <motion.div
+              className="absolute w-[450px] h-[450px] rounded-full glow-leak-bright pointer-events-none transition-all duration-1000 ease-out"
+              style={{
+                x: lightLeakX,
+                y: lightLeakY,
+                opacity: 0.4,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Interactive Cinematic Light Rays triggered on Burst */}
