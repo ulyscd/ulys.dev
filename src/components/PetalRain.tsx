@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
 interface Petal {
@@ -19,9 +19,22 @@ interface Petal {
 }
 
 export default function PetalRain() {
+  const [isMobile, setIsMobile] = useState(false);
+  const petalCount = isMobile ? 8 : 24;
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const updateMobileState = () => setIsMobile(query.matches);
+
+    updateMobileState();
+    query.addEventListener("change", updateMobileState);
+
+    return () => query.removeEventListener("change", updateMobileState);
+  }, []);
+
   const petals = useMemo(() => {
     // Generate a set of stable petals that will cycle infinitely
-    return Array.from({ length: 24 }).map((_, i) => ({
+    return Array.from({ length: petalCount }).map((_, i) => ({
       id: i,
       x: Math.random() * 110 - 5, // disperse wider than screen
       y: Math.random() * 120 - 20, // disperse vertically
@@ -32,7 +45,7 @@ export default function PetalRain() {
       rotation: Math.random() * 360,
       curveAmp: Math.random() * 30 + 15 // wiggle sway
     }));
-  }, []);
+  }, [petalCount]);
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-10 w-full h-full">
