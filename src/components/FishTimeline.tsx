@@ -19,69 +19,71 @@ interface FishTimelineItem {
   date: string;
 }
 
+const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
 const FISH_TIMELINE_ITEMS: FishTimelineItem[] = [
   {
-    src: "/fish/trout.jpg",
+    src: publicAsset("fish/trout.jpg"),
     caption: "the perfect fly day, end of an era.",
     date: "Dec. 2025",
   },
   {
-    src: "/fish/bfscoho.jpeg",
+    src: publicAsset("fish/bfscoho.jpeg"),
     caption: "coho rodeo 2, date.",
     date: "Nov. 2025",
   },
   {
-    src: "/fish/king.jpg",
+    src: publicAsset("fish/king.jpg"),
     caption: "filled the freezer.",
     date: "Sept. 2025",
   },
   {
-    src: "/fish/brown.jpg",
+    src: publicAsset("fish/brown.jpg"),
     caption: "exotic pattern pic.",
     date: "Jul. 2025",
   },
   {
-    src: "/fish/fallqua.jpg",
+    src: publicAsset("fish/fallqua.jpg"),
     caption: "chromer w/ the brotisserie.",
     date: "Jul. 2025",
   },
   {
-    src: "/fish/bull.jpg",
+    src: publicAsset("fish/bull.jpg"),
     caption: "snowy alpine bull",
     date: "Dec. 2024",
   },
   {
-    src: "/fish/twitch.jpg",
+    src: publicAsset("fish/twitch.jpg"),
     caption: "full kipe twitcher bite",
     date: "Nov. 2024",
   },
   {
-    src: "/fish/quasilvers.jpg",
+    src: publicAsset("fish/quasilvers.jpg"),
     caption: "doubled up silvers",
     date: "Oct. 2024",
   },
   {
-    src: "/fish/chrome.jpg",
+    src: publicAsset("fish/chrome.jpg"),
     caption: "let this dimer grow",
     date: "Oct. 2024",
   },
   {
-    src: "/fish/shad.jpg",
+    src: publicAsset("fish/shad.jpg"),
     caption: "pnw mini tarpon",
     date: "Jun. 2024",
   },
   {
-    src: "/fish/steel.jpg",
+    src: publicAsset("fish/steel.jpg"),
     caption: "steel prophecy",
     date: "Feb. 2024",
   },
   {
-    src: "/fish/coho.jpg",
+    src: publicAsset("fish/coho.jpg"),
     caption: "reignited, coho rodeo",
     date: "Oct. 2023",
   },
   {
-    src: "/fish/origin.jpg",
+    src: publicAsset("fish/origin.jpg"),
     caption: "the conception",
     date: "*error*",
   },

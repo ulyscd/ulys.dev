@@ -23,6 +23,8 @@ export interface ProjectCurated {
   techStack?: string[];
 }
 
+const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
 export const CURATED_PROJECTS: ProjectCurated[] = [
   {
     id: "fleur-sauvage",
@@ -83,7 +85,7 @@ export const CURATED_PROJECTS: ProjectCurated[] = [
     description: "I explored how University of Oregon students define great leadership and evaluate real political figures against that standard.\n\nStarting with qualitative interviews to surface the traits students actually associate with excellent leadership, I built and deployed a survey, ran regression and crosstab analyses in IBM SPSS Statistics, and translated findings into a six-page data driven visual article.",
     detailSubtitle: "primary researcher, data analyst & author experience",
     detailUrlLabel: "view article",
-    articleUrl: "/articles/leadership.pdf",
+    articleUrl: publicAsset("articles/leadership.pdf"),
     date: "[date]",
     category: "[category]",
     colorName: "[specification]",
