@@ -5,12 +5,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue } from "motion/react";
-import { X } from "lucide-react";
+import { Maximize2, X } from "lucide-react";
 import { CURATED_PROJECTS, ProjectCurated } from "./data/projects";
 import FloralHalo from "./components/FloralHalo";
 import PetalRain from "./components/PetalRain";
 import PixelGrid from "./components/PixelGrid";
 import BottomRightAsciiArt from "./components/BottomRightAsciiArt";
+import FishTimeline from "./components/FishTimeline";
 import githubIcon from "../assets/social/github.webp";
 import instagramIcon from "../assets/social/insta.webp";
 import linkedinIcon from "../assets/social/linkedin.webp";
@@ -33,6 +34,9 @@ const SOCIAL_LINKS = [
   },
 ];
 
+const getPdfViewerUrl = (url: string) =>
+  `${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`;
+
 export default function App() {
   // Global States
   const [loading, setLoading] = useState(true);
@@ -46,9 +50,15 @@ export default function App() {
   const [showCompositions, setShowCompositions] = useState(false);
   const [activeComposition, setActiveComposition] =
     useState<ProjectCurated | null>(null);
+  const [showArticle, setShowArticle] = useState(false);
+  const [showExtendedArticle, setShowExtendedArticle] = useState(false);
+  const [showFishTimelineExtended, setShowFishTimelineExtended] =
+    useState(false);
 
   // Active light bloom rays triggers
   const [burstActive, setBurstActive] = useState(false);
+  const [isGreenTheme, setIsGreenTheme] = useState(false);
+  const [themePulseKey, setThemePulseKey] = useState(0);
 
   // Simulated vintage loading cycle, styled purely in vibrant pink on white
   useEffect(() => {
@@ -100,11 +110,31 @@ export default function App() {
     }, 1800);
   };
 
+  const handleThemeToggle = () => {
+    setIsGreenTheme((current) => !current);
+    setThemePulseKey((key) => key + 1);
+  };
+
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="min-h-screen bg-white text-[#FF007F] flex flex-col justify-between relative overflow-hidden select-none font-sans"
+      className={`theme-surface min-h-screen bg-white text-[var(--theme-hot)] flex flex-col justify-between relative overflow-hidden select-none font-sans ${
+        isGreenTheme ? "theme-green" : ""
+      }`}
     >
+      <AnimatePresence>
+        {themePulseKey > 0 && (
+          <motion.div
+            key={themePulseKey}
+            initial={{ scaleY: 0, opacity: 0.95 }}
+            animate={{ scaleY: 1, opacity: [0.95, 0.42, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease: "easeInOut" }}
+            className="theme-shift-wash fixed inset-0 z-[70] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
       <div
         className={`absolute inset-0 transition-[filter,transform] duration-500 ${
           showCompositions ? "blur-sm scale-[0.99]" : "blur-0 scale-100"
@@ -174,7 +204,7 @@ export default function App() {
                   delay: idx * 0.12,
                   ease: "easeOut",
                 }}
-                className="w-[1.5px] bg-gradient-to-b from-transparent via-[#FF007F] to-transparent h-full"
+                className="w-[1.5px] bg-gradient-to-b from-transparent via-[var(--theme-hot)] to-transparent h-full"
               />
             ))}
           </motion.div>
@@ -193,16 +223,16 @@ export default function App() {
             className="absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6"
           >
             <div className="w-[280px] text-center space-y-5">
-              <p className="font-serif italic text-3xl text-[#FF007F] tracking-wide">
+              <p className="font-serif italic text-3xl text-[var(--theme-hot)] tracking-wide">
                 ulys.dev
               </p>
-              <div className="w-full h-[1px] bg-[#FF007F]/20 relative">
+              <div className="w-full h-[1px] bg-[var(--theme-hot)]/20 relative">
                 <motion.div
-                  className="absolute left-0 top-0 h-full bg-[#FF007F]"
+                  className="absolute left-0 top-0 h-full bg-[var(--theme-hot)]"
                   style={{ width: `${loadPercentage}%` }}
                 />
               </div>
-              <div className="flex justify-between font-mono text-[8px] text-[#FF007F]/80 tracking-widest uppercase">
+              <div className="flex justify-between font-mono text-[8px] text-[var(--theme-hot)]/80 tracking-widest uppercase">
                 <span>BUFFERING SPEC_</span>
                 <span>{loadPercentage}%</span>
               </div>
@@ -219,9 +249,9 @@ export default function App() {
           <motion.div
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.8 }}
-            className="w-4 h-4 flex items-center justify-center rounded-full border border-[#FF007F]/40"
+            className="w-4 h-4 flex items-center justify-center rounded-full border border-[var(--theme-hot)]/40"
           >
-            <span className="w-1.5 h-1.5 bg-[#FF007F] rounded-full animate-ping" />
+            <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full animate-ping" />
           </motion.div>
         </div>
 
@@ -248,18 +278,18 @@ export default function App() {
         <div className="order-1 md:order-2 md:col-span-5 flex flex-col items-center md:items-start justify-center space-y-6 md:space-y-8 text-center md:text-left md:pl-8 pointer-events-auto pt-2 md:pt-0">
           {/* Elite Title Heading & Underlined structures */}
           <div className="space-y-3">
-            <h1 className="font-serif italic text-4xl sm:text-5xl md:text-6xl text-[#FF007F] tracking-wide leading-none select-none">
+            <h1 className="font-serif italic text-4xl sm:text-5xl md:text-6xl text-[var(--theme-hot)] tracking-wide leading-none select-none">
               ulys drumrongthai
             </h1>
-            <div className="w-24 h-[1px] bg-[#FF007F]/40 mx-auto md:mx-0" />
+            <div className="w-24 h-[1px] bg-[var(--theme-hot)]/40 mx-auto md:mx-0" />
           </div>
 
           {/* Bio statement description */}
           <div className="space-y-4 max-w-sm">
-            <p className="font-sans text-xs text-[#FF007F]/80 uppercase tracking-widest leading-relaxed">
+            <p className="font-sans text-xs text-[var(--theme-hot)]/80 uppercase tracking-widest leading-relaxed">
               (yoo-lis)
             </p>
-            <p className="font-serif text-lg text-[#FF007F] font-light leading-relaxed">
+            <p className="font-serif text-lg text-[var(--theme-hot)] font-light leading-relaxed">
               data science & c.i.t. undergrad
             </p>
           </div>
@@ -275,13 +305,13 @@ export default function App() {
                   rel="noreferrer"
                   whileHover={{ y: -3, scale: 1.08 }}
                   whileTap={{ scale: 0.94 }}
-                  className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF007F]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
+                  className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
                   aria-label={link.label}
                 >
                   <img
                     src={link.icon}
                     alt=""
-                    className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,0,127,0.55)]"
+                    className="w-full h-full object-contain transition-[filter] duration-500 [filter:var(--theme-icon-filter)_drop-shadow(0_0_8px_rgba(var(--theme-rgb),0.55))]"
                     draggable={false}
                   />
                 </motion.a>
@@ -292,7 +322,7 @@ export default function App() {
                 onClick={handleIntroduceClick}
                 whileHover={{
                   y: -3,
-                  boxShadow: "0px 12px 24px rgba(255, 0, 127, 0.18)",
+                  boxShadow: "0px 12px 24px rgba(var(--theme-rgb), 0.18)",
                 }}
                 whileTap={{
                   scale: 0.98,
@@ -304,11 +334,14 @@ export default function App() {
                   damping: 24,
                   mass: 0.6,
                 }}
-                className="relative z-10 w-full py-4 bg-white hover:bg-[#FFF0F5]/40 border-2 border-[#FF007F] rounded text-xs font-mono tracking-widest text-[#FF007F] flex items-center justify-center space-x-2 transition-all cursor-pointer focus:outline-none"
+                className="relative z-10 w-full py-4 bg-white hover:bg-[var(--theme-light)]/40 border-2 border-[var(--theme-hot)] rounded text-xs font-mono tracking-widest text-[var(--theme-hot)] flex items-center justify-center space-x-2 transition-all cursor-pointer focus:outline-none"
               >
-                <span>[ COMPOSITION ]</span>
+                <span>[ ENTER ]</span>
               </motion.button>
-              <BottomRightAsciiArt />
+              <BottomRightAsciiArt
+                isGreenTheme={isGreenTheme}
+                onToggleTheme={handleThemeToggle}
+              />
             </div>
           </div>
         </div>
@@ -325,23 +358,23 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-white/20 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto"
           >
-            <div className="max-w-4xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-none overflow-hidden flex flex-col space-y-4 md:space-y-6 relative border border-white/45 p-4 md:p-8 rounded bg-white/55 shadow-[0_24px_80px_rgba(255,0,127,0.22)] backdrop-blur-2xl ring-1 ring-[#FF007F]/20 pointer-events-auto">
+            <div className="max-w-4xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-none overflow-hidden flex flex-col space-y-4 md:space-y-6 relative border border-white/45 p-4 md:p-8 rounded bg-white/55 shadow-[0_24px_80px_rgba(var(--theme-rgb),0.22)] backdrop-blur-2xl ring-1 ring-[var(--theme-hot)]/20 pointer-events-auto">
               {/* Header inside overlay */}
-              <div className="flex justify-between items-start gap-4 border-b border-[#FF007F]/20 pb-3 md:pb-4 shrink-0">
+              <div className="flex justify-between items-start gap-4 border-b border-[var(--theme-hot)]/20 pb-3 md:pb-4 shrink-0">
                 <div className="min-w-0">
-                  <h2 className="font-serif italic text-2xl md:text-3xl text-[#FF007F] leading-none">
-                    Curated Compositions
+                  <h2 className="font-serif italic text-2xl md:text-3xl text-[var(--theme-hot)] leading-none">
+                    About Me
                   </h2>
-                  <p className="font-mono text-[8px] text-[#FF007F]/80 tracking-widest uppercase">
-                    SPEC_REVOLUTION_INDEX
-                  </p>
                 </div>
                 <button
                   onClick={() => {
                     setShowCompositions(false);
                     setActiveComposition(null);
+                    setShowArticle(false);
+                    setShowExtendedArticle(false);
+                    setShowFishTimelineExtended(false);
                   }}
-                  className="shrink-0 p-1 border border-[#FF007F]/30 rounded-full hover:bg-[#FFF0F5] text-[#FF007F] transition-all cursor-pointer focus:outline-none"
+                  className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -356,11 +389,14 @@ export default function App() {
                       key={project.id}
                       onClick={() => {
                         setActiveComposition(project);
+                        setShowArticle(false);
+                        setShowExtendedArticle(false);
+                        setShowFishTimelineExtended(false);
                       }}
-                      className={`text-left p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[#FF007F]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[#FF007F] border-[#FF007F]/20 hover:border-[#FF007F]/50 hover:bg-white/55 backdrop-blur-md"}`}
+                      className={`text-left p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[var(--theme-hot)]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[var(--theme-hot)] border-[var(--theme-hot)]/20 hover:border-[var(--theme-hot)]/50 hover:bg-white/55 backdrop-blur-md"}`}
                     >
                       <div className="flex justify-between items-baseline font-mono text-[8px] opacity-85 mb-1">
-                        <span>COMPOSITION</span>
+                        <span>{project.navLabel}</span>
                         <span>[{project.num}]</span>
                       </div>
                       <h3 className="font-serif text-base md:text-lg tracking-wide">
@@ -374,73 +410,235 @@ export default function App() {
                 </div>
 
                 {/* Details view: Right */}
-                <div className="md:col-span-7 border border-dashed border-[#FF007F]/30 p-4 md:p-6 rounded bg-white/25 backdrop-blur-md flex flex-col justify-between min-h-[230px] md:min-h-0">
+                <div className="relative md:col-span-7 border border-dashed border-[var(--theme-hot)]/30 p-4 md:p-6 rounded bg-white/25 backdrop-blur-md flex flex-col justify-between min-h-[230px] md:min-h-0 overflow-hidden">
                   {activeComposition ? (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-[9px] font-mono opacity-80 uppercase">
-                          <span>{activeComposition.category}</span>
-                          <span>{activeComposition.date}</span>
-                        </div>
-                        <h3 className="font-serif italic text-xl md:text-2xl text-[#FF007F] mt-1">
+                    activeComposition.id === "blush-chronicles" ? (
+                      <div className="flex h-full min-h-0 flex-col space-y-4">
+                        <h3 className="font-serif italic text-xl md:text-2xl text-[var(--theme-hot)]">
                           {activeComposition.title}
                         </h3>
-                        <p className="font-mono text-[8px] text-[#FF007F]/85 mt-0.5">
-                          SPECIFICATION:{" "}
-                          {activeComposition.colorName.toUpperCase()}
-                        </p>
+                        <FishTimeline
+                          onExtend={() => setShowFishTimelineExtended(true)}
+                        />
                       </div>
-
-                      <div className="w-full h-[1px] bg-[#FF007F]/10" />
-
-                      <p className="font-serif text-sm leading-relaxed text-[#FF007F] font-light italic">
-                        "{activeComposition.description}"
-                      </p>
-
-                      <div className="space-y-1.5 pt-2">
-                        <div className="text-[8px] font-mono uppercase tracking-widest text-[#FF007F] font-bold">
-                          KINETIC ATTRIBUTES:
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-serif italic text-xl md:text-2xl text-[var(--theme-hot)]">
+                            {activeComposition.title}
+                          </h3>
+                          {activeComposition.detailSubtitle && (
+                            <p className="font-mono text-[10px] text-[var(--theme-hot)]/85 mt-1.5 leading-relaxed">
+                              {activeComposition.detailSubtitle}
+                              {activeComposition.articleUrl &&
+                                activeComposition.detailUrlLabel && (
+                                  <>
+                                    {" ⇢ "}
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowArticle(true)}
+                                      className="underline underline-offset-2 hover:opacity-70 focus:outline-none cursor-pointer"
+                                    >
+                                      [{activeComposition.detailUrlLabel}]
+                                    </button>
+                                  </>
+                                )}
+                              {!activeComposition.articleUrl &&
+                                activeComposition.detailUrl &&
+                                activeComposition.detailUrlLabel && (
+                                  <>
+                                    {" ⇢ "}
+                                    <a
+                                      href={activeComposition.detailUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="underline underline-offset-2 hover:opacity-70"
+                                    >
+                                      [{activeComposition.detailUrlLabel}]
+                                    </a>
+                                  </>
+                                )}
+                            </p>
+                          )}
                         </div>
-                        {activeComposition.extraDetails.map((detail, dIdx) => (
-                          <div
-                            key={dIdx}
-                            className="text-xs font-sans font-light flex items-start"
-                          >
-                            <span className="text-[#FF007F] mr-1.5 opacity-80">
-                              ▪
-                            </span>
-                            <span>{detail}</span>
+
+                        <div className="w-full h-[1px] bg-[var(--theme-hot)]/10" />
+
+                        <p className="font-serif text-sm leading-relaxed text-[var(--theme-hot)] font-light whitespace-pre-line">
+                          "{activeComposition.description}"
+                        </p>
+
+                        {activeComposition.extraDetails.length > 0 && (
+                          <div className="space-y-1.5 pt-2">
+                            <div className="text-[8px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                              {activeComposition.featuresLabel ??
+                                "KINETIC ATTRIBUTES:"}
+                            </div>
+                            {activeComposition.extraDetails.map(
+                              (detail, dIdx) => (
+                                <div
+                                  key={dIdx}
+                                  className="text-xs font-sans font-light flex items-start"
+                                >
+                                  <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
+                                    ▪
+                                  </span>
+                                  <span>{detail}</span>
+                                </div>
+                              ),
+                            )}
                           </div>
-                        ))}
+                        )}
+
+                        {activeComposition.techStack &&
+                          activeComposition.techStack.length > 0 && (
+                            <div className="space-y-1.5 pt-2">
+                              <div className="text-[8px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                                {activeComposition.techStackLabel ??
+                                  "TECH STACK:"}
+                              </div>
+                              {activeComposition.techStack.map(
+                                (detail, dIdx) => (
+                                  <div
+                                    key={dIdx}
+                                    className="text-xs font-sans font-light flex items-start"
+                                  >
+                                    <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
+                                      ▪
+                                    </span>
+                                    <span>{detail}</span>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          )}
                       </div>
-                    </div>
+                    )
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                      <div className="w-8 h-8 rounded-full border border-dashed border-[#FF007F]/40 flex items-center justify-center animate-spin duration-3000 mb-3">
-                        <span className="w-1.5 h-1.5 bg-[#FF007F] rounded-full" />
+                      <div className="w-8 h-8 rounded-full border border-dashed border-[var(--theme-hot)]/40 flex items-center justify-center animate-spin duration-3000 mb-3">
+                        <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full" />
                       </div>
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-[#FF007F]/60">
-                        SELECT A COMPOSITION FROM THE LIST ON THE LEFT TO VIEW
-                        SPECIFICATIONS
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/60">
+                        select something
                       </p>
                     </div>
                   )}
 
-                  {activeComposition && (
-                    <div className="pt-4 border-t border-[#FF007F]/10 text-right">
-                      <button
-                        onClick={() => {
-                          setShowCompositions(false);
-                        }}
-                        className="text-[10px] font-mono tracking-widest uppercase hover:underline focus:outline-none cursor-pointer"
-                      >
-                        [ CLOSE PORTKEY ]
-                      </button>
+                  {showArticle && activeComposition?.articleUrl && (
+                    <div className="absolute inset-2 md:inset-3 z-30 flex flex-col overflow-hidden rounded border border-[var(--theme-hot)]/30 bg-white/95 shadow-[0_18px_60px_rgba(var(--theme-rgb),0.22)] backdrop-blur-xl">
+                      <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-3 py-2">
+                        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/75">
+                          article_view
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowExtendedArticle(true)}
+                            className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                            aria-label="Extend article view"
+                          >
+                            <Maximize2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowArticle(false);
+                              setShowExtendedArticle(false);
+                            }}
+                            className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                            aria-label="Close article"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <iframe
+                        src={getPdfViewerUrl(activeComposition.articleUrl)}
+                        title={`${activeComposition.title} article`}
+                        className="min-h-0 flex-1 w-full bg-white"
+                      />
                     </div>
                   )}
                 </div>
               </div>
             </div>
+
+            <AnimatePresence>
+              {showExtendedArticle && activeComposition?.articleUrl && (
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", stiffness: 180, damping: 28 }}
+                  data-testid="extended-article-view"
+                  className="fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 border-l border-[var(--theme-hot)]/25 bg-white/95 shadow-[-24px_0_80px_rgba(var(--theme-rgb),0.24)] backdrop-blur-2xl flex flex-col"
+                >
+                  <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-4 py-3">
+                    <div>
+                      <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
+                        extended_article_view
+                      </p>
+                      <h3 className="font-serif italic text-lg text-[var(--theme-hot)] leading-tight">
+                        {activeComposition.title}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowArticle(false);
+                        setShowExtendedArticle(false);
+                      }}
+                      className="shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                      aria-label="Close article"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <iframe
+                    src={getPdfViewerUrl(activeComposition.articleUrl)}
+                    title={`${activeComposition.title} extended article`}
+                    className="min-h-0 flex-1 w-full bg-white"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showFishTimelineExtended &&
+                activeComposition?.id === "blush-chronicles" && (
+                  <motion.div
+                    initial={{ x: "100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "100%" }}
+                    transition={{ type: "spring", stiffness: 180, damping: 28 }}
+                    data-testid="extended-fish-timeline-view"
+                    className="fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 border-l border-[var(--theme-hot)]/25 bg-white/95 shadow-[-24px_0_80px_rgba(var(--theme-rgb),0.24)] backdrop-blur-2xl flex flex-col"
+                  >
+                    <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-4 py-3">
+                      <div>
+                        <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
+                          extended_fish_timeline
+                        </p>
+                        <h3 className="font-serif italic text-lg text-[var(--theme-hot)] leading-tight">
+                          fish pics
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowFishTimelineExtended(false)}
+                        className="shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                        aria-label="Close fish timeline"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="min-h-0 flex-1 p-3 md:p-4">
+                      <FishTimeline variant="extended" />
+                    </div>
+                  </motion.div>
+                )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

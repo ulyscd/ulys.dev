@@ -6,74 +6,99 @@
 export interface ProjectCurated {
   id: string;
   num: string;
+  navLabel: string;
   title: string;
   subtitle: string;
   description: string;
+  detailSubtitle?: string;
+  detailUrl?: string;
+  detailUrlLabel?: string;
+  articleUrl?: string;
   date: string;
   category: string;
   colorName: string;
   extraDetails: string[];
+  featuresLabel?: string;
+  techStackLabel?: string;
+  techStack?: string[];
 }
 
 export const CURATED_PROJECTS: ProjectCurated[] = [
   {
     id: "fleur-sauvage",
     num: "01",
-    title: "La Fleur Sauvage",
-    subtitle: "Organic digital scent experiment",
-    description: "An early study exploring cross-modal translation between fluid vector lines and notes of white dianthus, jasmine, and cedarwood. Built as an interactive sensory canvas.",
+    navLabel: "PROJECT",
+    title: "Fish-E-Dex",
+    subtitle: "fishing journal web app",
+    description: "hook em' all! I built this poke-e-dex inspired fishing journal for me and my friends to have somewhere we can look back at the memories we made spending time outdoors and catching fish",
+    detailSubtitle: "prolong fish pics and memories",
+    detailUrl: "https://www.fishy.quest/",
+    detailUrlLabel: "www.fishy.quest",
     date: "10.2003",
     category: "Net-Art / Kinetic Sound",
     colorName: "Blush Silk",
     extraDetails: [
-      "Designed with 0.25mm vector coordinate clusters",
-      "Interactive harmonic scale based on user cursor speed",
-      "Premiered at the Tokyo Digital Horizon Showcase"
+      "log & browse your fishing memories with pictures, catch counts, scenery, field notes, and more!",
+      "accumulate insights on your fishing patterns and tick off every species in the fish-e-dex journal."
+    ],
+    featuresLabel: "features:",
+    techStackLabel: "tech stack:",
+    techStack: [
+      "Frontend: React, Vite",
+      "Database & Auth: Supabase (PostgreSQL, Auth, Storage)",
+      "Styling: Done with love."
     ]
   },
   {
     id: "scent-silhouette",
     num: "02",
-    title: "Scent & Silhouette",
-    subtitle: "Fashion Editorial intro sequence",
-    description: "A cinematic introduction crafted with high-contrast floral overlays and slow-fading layered transparencies, translating the weight of fine linen and soft wind into mathematical coordinate grids.",
+    navLabel: "PROJECT",
+    title: "PortFlo",
+    subtitle: "supply chain mineral tracker",
+    description: "This project was a QuackHacks 2026 winner! In 17 hours my team and I deployed this supply-chain intelligence dashboard for monitoring global risk across critical materials, trade routes, ports, suppliers, and chokepoints.",
+    detailSubtitle: "real time risk assessment supply chain dashboard",
+    detailUrl: "https://stevensanche.github.io/portflo-quackhacks/portflodemo.html",
+    detailUrlLabel: "www.portflo.demo",
     date: "04.2004",
     category: "Motion Design / Fashion",
     colorName: "Dianthus Blush",
     extraDetails: [
-      "Custom bezier spline interpolations",
-      "Translucent overlay transparency maps (30 layers)",
-      "Soundscape engineered with low-frequency organ pads"
+      "combines public data sources with an interactive globe.",
+      "AI-powered daily briefings and risk scores pertaining to price and geo-political events."
+    ],
+    featuresLabel: "features:",
+    techStackLabel: "tech stack:",
+    techStack: [
+      "Frontend: React, Vite, Typescript",
+      "Backend: FastAPI on Uvicorn",
+      "Database & Auth: Supabase (PostgreSQL, Auth, Storage)"
     ]
   },
   {
     id: "aura-editorial",
     num: "03",
-    title: "Aura and Ephemera",
-    subtitle: "Interactive digital publication",
-    description: "A digital sanctuary documenting the fleeting nature of early-2000s net culture. Features elegant typography paired with kinetic line ornaments that drift like steam based on ambient focus.",
-    date: "11.2004",
-    category: "Hypertext / Typography",
-    colorName: "Powder Rose",
-    extraDetails: [
-      "Over 40 micro-typography presets",
-      "Kinetic responsive gravity particle fields",
-      "Honorable mention - NetArt Frontier 2004"
-    ]
+    navLabel: "RESEARCH",
+    title: "Leadership Research Article",
+    subtitle: "political leader brands evaluation @ uoregon",
+    description: "I explored how University of Oregon students define great leadership and evaluate real political figures against that standard.\n\nStarting with qualitative interviews to surface the traits students actually associate with excellent leadership, I built and deployed a survey, ran regression and crosstab analyses in IBM SPSS Statistics, and translated findings into a six-page data driven visual article.",
+    detailSubtitle: "primary researcher, data analyst & author experience",
+    detailUrlLabel: "view article",
+    articleUrl: "/articles/leadership.pdf",
+    date: "[date]",
+    category: "[category]",
+    colorName: "[specification]",
+    extraDetails: []
   },
   {
     id: "blush-chronicles",
     num: "04",
-    title: "The Blush Chronicles",
-    subtitle: "Tactile vector sculpture",
-    description: "A procedural flower generator mimicking the fractal growth of the Dianthus barbatus. Each blossom is simulated using thousands of delicate pink hairlines responding to micro-sonics.",
-    date: "01.2005",
-    category: "Generative Code / Art",
-    colorName: "Pale Peony",
-    extraDetails: [
-      "Procedural math-art engine",
-      "Real-time audio reactive blooming states",
-      "Preserved in the Digital Fragility Archives"
-    ]
+    navLabel: "TIMELINE",
+    title: "Fish Pics",
+    subtitle: "some memorable catches...",
+    description: "",
+    date: "[date]",
+    category: "[category]",
+    colorName: "[specification]",
+    extraDetails: []
   }
 ];

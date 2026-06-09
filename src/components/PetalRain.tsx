@@ -70,8 +70,8 @@ export default function PetalRain() {
             style={{
               fontSize: petal.size * 1.6,
               opacity: petal.opacity,
-              color: '#FF007F',
-              filter: `drop-shadow(0 2px 4px rgba(255, 0, 127, 0.15))`,
+              color: 'var(--theme-hot)',
+              filter: `drop-shadow(0 2px 4px rgba(var(--theme-rgb), 0.15))`,
               lineHeight: 1,
             }}
             className="font-sans select-none pointer-events-none"
@@ -82,9 +82,9 @@ export default function PetalRain() {
       ))}
 
       {/* Floating horizontal or vertical hair-thin energy streams (Flash aesthetic) */}
-      <div className="absolute top-[25%] left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-[#FF007F]/25 to-transparent pointer-events-none" />
-      <div className="absolute top-[68%] left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-[#FF007F]/25 to-transparent pointer-events-none" />
-      <div className="absolute left-[30%] top-0 h-full w-[0.5px] bg-gradient-to-b from-transparent via-[#FF007F]/15 to-transparent pointer-events-none" />
+      <div className="absolute top-[25%] left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-[var(--theme-hot)]/25 to-transparent pointer-events-none" />
+      <div className="absolute top-[68%] left-0 w-full h-[0.5px] bg-gradient-to-r from-transparent via-[var(--theme-hot)]/25 to-transparent pointer-events-none" />
+      <div className="absolute left-[30%] top-0 h-full w-[0.5px] bg-gradient-to-b from-transparent via-[var(--theme-hot)]/15 to-transparent pointer-events-none" />
     </div>
   );
 }

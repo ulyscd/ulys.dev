@@ -6,9 +6,39 @@
   --font-sans: "Pixelify Sans", system-ui, sans-serif;
   --font-mono: "Pixelify Sans", monospace;
 
-  --color-dianthus-hot: #ff007f;
+  --color-dianthus-hot: var(--theme-hot);
   --color-dianthus-deep: #b30059;
-  --color-dianthus-light: #fff0f5;
+  --color-dianthus-light: var(--theme-light);
+}
+
+:root {
+  --theme-hot: #ff007f;
+  --theme-rgb: 255, 0, 127;
+  --theme-light: #fff0f5;
+  --theme-light-rgb: 255, 240, 245;
+  --theme-icon-filter: hue-rotate(0deg) saturate(100%);
+}
+
+.theme-green {
+  --theme-hot: #99b36c;
+  --theme-rgb: 153, 179, 108;
+  --theme-light: #f4f8ed;
+  --theme-light-rgb: 244, 248, 237;
+  --theme-icon-filter: hue-rotate(109deg) saturate(48%);
+}
+
+.theme-surface {
+  transition: color 650ms ease, background-color 650ms ease, border-color 650ms ease;
+}
+
+.theme-shift-wash {
+  background: linear-gradient(
+    to top,
+    rgba(var(--theme-rgb), 0.22),
+    rgba(var(--theme-light-rgb), 0.52) 48%,
+    rgba(255, 255, 255, 0)
+  );
+  transform-origin: bottom;
 }
 
 /* Custom background animations & vintage textures */
@@ -16,15 +46,15 @@ body,
 #root,
 .root {
   background-color: #ffffff;
-  /* Extremely subtle, dreamy light pink radial vignette on the left, fading into white on the right */
+  /* Extremely subtle, dreamy theme-color vignette on the left, fading into white on the right */
   background-image: radial-gradient(
     circle at 25% 50%,
-    rgba(255, 0, 127, 0.05) 0%,
-    rgba(255, 240, 245, 0.02) 40%,
+    rgba(var(--theme-rgb), 0.05) 0%,
+    rgba(var(--theme-light-rgb), 0.02) 40%,
     rgba(255, 255, 255, 0) 80%
   );
   background-attachment: fixed;
-  color: #ff007f;
+  color: var(--theme-hot);
   font-family: var(--font-sans);
   overflow-x: hidden;
   margin: 0;
@@ -40,7 +70,7 @@ select {
   font-family: var(--font-sans);
 }
 
-/* Custom scrollbar matching pure pink/white */
+/* Custom scrollbar matching the active theme on white */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -50,12 +80,12 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 0, 127, 0.2);
+  background: rgba(var(--theme-rgb), 0.2);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff007f;
+  background: var(--theme-hot);
 }
 
 /* Glass & light flares */
@@ -66,7 +96,7 @@ select {
   will-change: transform, opacity;
   background: radial-gradient(
     circle,
-    rgba(255, 0, 127, 0.25) 0%,
+    rgba(var(--theme-rgb), 0.25) 0%,
     rgba(255, 255, 255, 0) 70%
   );
 }
@@ -78,14 +108,14 @@ select {
   will-change: transform, opacity;
   background: radial-gradient(
     circle,
-    rgba(255, 0, 127, 0.45) 0%,
+    rgba(var(--theme-rgb), 0.45) 0%,
     rgba(255, 255, 255, 0) 65%
   );
 }
 
 .thin-line {
   height: 1px;
-  background-color: #ff007f;
+  background-color: var(--theme-hot);
   opacity: 0.15;
 }
 
