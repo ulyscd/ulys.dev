@@ -236,7 +236,7 @@ export default function App() {
                 />
               </div>
               <div className="flex justify-between font-mono text-[8px] text-[var(--theme-hot)]/80 tracking-widest uppercase">
-                <span>BUFFERING SPEC_</span>
+                <span>loading...</span>
                 <span>{loadPercentage}%</span>
               </div>
             </div>
