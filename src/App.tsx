@@ -12,6 +12,7 @@ import PetalRain from "./components/PetalRain";
 import PixelGrid from "./components/PixelGrid";
 import BottomRightAsciiArt from "./components/BottomRightAsciiArt";
 import FishTimeline from "./components/FishTimeline";
+import loaderTitleAscii from "./assets/loader-title-ascii.txt?raw";
 import selectCenterBorderAscii from "./assets/select-center-border-ascii.txt?raw";
 import selectLeftAscii from "./assets/select-left-ascii.txt?raw";
 import selectWindowAscii from "./assets/select-window-ascii.txt?raw";
@@ -229,10 +230,10 @@ export default function App() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6"
           >
-            <div className="w-[280px] text-center space-y-5">
-              <p className="font-serif italic text-3xl text-[var(--theme-hot)] tracking-wide">
-                ulys.dev
-              </p>
+            <div className="w-[min(92vw,520px)] text-center space-y-5">
+              <pre className="mx-auto max-w-full whitespace-pre text-center [font-family:var(--font-ascii)] text-[3px] leading-[0.82] text-[var(--theme-hot)] drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.12)] sm:text-[3.8px] md:text-[4.5px]">
+                {loaderTitleAscii}
+              </pre>
               <div className="w-full h-[1px] bg-[var(--theme-hot)]/20 relative">
                 <motion.div
                   className="absolute left-0 top-0 h-full bg-[var(--theme-hot)]"
@@ -525,7 +526,7 @@ export default function App() {
                     <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden text-center">
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center font-mono text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
+                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center [font-family:var(--font-ascii)] text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
                       >
                         {selectCenterBorderAscii}
                       </pre>
@@ -537,13 +538,13 @@ export default function App() {
                       </p>
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute -bottom-[1px] right-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-right font-mono text-[1.35px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[1.65px] md:right-8 md:text-[1.95px]"
+                        className="pointer-events-none absolute -bottom-[1px] right-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-right [font-family:var(--font-ascii)] text-[1.35px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[1.65px] md:right-8 md:text-[1.95px]"
                       >
                         {selectWindowAscii.trimEnd()}
                       </pre>
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute -bottom-[1px] left-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-left font-mono text-[2.025px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[2.475px] md:left-8 md:text-[2.925px]"
+                        className="pointer-events-none absolute -bottom-[1px] left-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-left [font-family:var(--font-ascii)] text-[2.025px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[2.475px] md:left-8 md:text-[2.925px]"
                       >
                         {selectLeftAscii.trimEnd()}
                       </pre>
