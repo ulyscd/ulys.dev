@@ -1,0 +1,99 @@
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Pixelify Sans", monospace;
+  --font-sans: "Pixelify Sans", system-ui, sans-serif;
+  --font-mono: "Pixelify Sans", monospace;
+
+  --color-dianthus-hot: #ff007f;
+  --color-dianthus-deep: #b30059;
+  --color-dianthus-light: #fff0f5;
+}
+
+/* Custom background animations & vintage textures */
+body,
+#root,
+.root {
+  background-color: #ffffff;
+  /* Extremely subtle, dreamy light pink radial vignette on the left, fading into white on the right */
+  background-image: radial-gradient(
+    circle at 25% 50%,
+    rgba(255, 0, 127, 0.05) 0%,
+    rgba(255, 240, 245, 0.02) 40%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  background-attachment: fixed;
+  color: #ff007f;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+}
+
+button,
+label,
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
+}
+
+/* Custom scrollbar matching pure pink/white */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 0, 127, 0.2);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff007f;
+}
+
+/* Glass & light flares */
+.glow-leak {
+  contain: paint;
+  filter: blur(100px);
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 127, 0.25) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+.glow-leak-bright {
+  contain: paint;
+  filter: blur(80px);
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 127, 0.45) 0%,
+    rgba(255, 255, 255, 0) 65%
+  );
+}
+
+.thin-line {
+  height: 1px;
+  background-color: #ff007f;
+  opacity: 0.15;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
