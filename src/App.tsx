@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { Maximize2, X } from "lucide-react";
 import { CURATED_PROJECTS, ProjectCurated } from "./data/projects";
 import FloralHalo from "./components/FloralHalo";
@@ -41,10 +41,26 @@ const SOCIAL_LINKS = [
 const getPdfViewerUrl = (url: string) =>
   `${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`;
 
+const SITE_THEMES = ["pink", "green", "navy", "black"] as const;
+type SiteTheme = (typeof SITE_THEMES)[number];
+
+const THEME_CLASS: Record<SiteTheme, string> = {
+  pink: "",
+  green: "theme-green",
+  navy: "theme-navy",
+  black: "theme-black",
+};
+
+const LOADER_GREEN = "#86a45c";
+const LOADER_NAVY = "#1a365d";
+const LOADER_NAVY_RGB = "26, 54, 93";
+
 export default function App() {
   // Global States
   const [loading, setLoading] = useState(true);
-  const [loadPercentage, setLoadPercentage] = useState(0);
+  const loadProgress = useMotionValue(0);
+  const [displayPercent, setDisplayPercent] = useState(0);
+  const loadBarWidth = useTransform(loadProgress, (value) => `${Math.min(100, value)}%`);
   const lightLeakX = useMotionValue(-180);
   const lightLeakY = useMotionValue(-180);
   const pointerFrame = useRef<number | null>(null);
@@ -61,25 +77,45 @@ export default function App() {
 
   // Active light bloom rays triggers
   const [burstActive, setBurstActive] = useState(false);
-  const [isGreenTheme, setIsGreenTheme] = useState(false);
+  const [siteTheme, setSiteTheme] = useState<SiteTheme>("navy");
   const [themePulseKey, setThemePulseKey] = useState(0);
 
-  // Simulated vintage loading cycle, styled purely in vibrant pink on white
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLoadPercentage((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setLoading(false);
-          }, 350);
-          return 100;
-        }
-        return prev + (Math.floor(Math.random() * 15) + 5);
+    const unsubscribe = loadProgress.on("change", (value) => {
+      setDisplayPercent(Math.min(100, Math.round(value)));
+    });
+    return unsubscribe;
+  }, [loadProgress]);
+
+  useEffect(() => {
+    let current = 0;
+    let finished = false;
+
+    const interval = window.setInterval(() => {
+      if (finished) return;
+
+      if (current >= 100) {
+        finished = true;
+        window.clearInterval(interval);
+        void animate(loadProgress, 100, {
+          duration: 0.25,
+          ease: "easeOut",
+        }).then(() => {
+          window.setTimeout(() => setLoading(false), 280);
+        });
+        return;
+      }
+
+      const step = Math.floor(Math.random() * 7) + 3;
+      current = Math.min(100, current + step);
+      void animate(loadProgress, current, {
+        duration: 0.28,
+        ease: "easeOut",
       });
-    }, 80);
-    return () => clearInterval(interval);
-  }, []);
+    }, 75);
+
+    return () => window.clearInterval(interval);
+  }, [loadProgress]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (showCompositions) return;
@@ -116,17 +152,18 @@ export default function App() {
     }, 1800);
   };
 
-  const handleThemeToggle = () => {
-    setIsGreenTheme((current) => !current);
+  const handleThemeCycle = () => {
+    setSiteTheme((current) => {
+      const currentIndex = SITE_THEMES.indexOf(current);
+      return SITE_THEMES[(currentIndex + 1) % SITE_THEMES.length];
+    });
     setThemePulseKey((key) => key + 1);
   };
 
   return (
     <div
       onMouseMove={handleMouseMove}
-      className={`theme-surface min-h-screen bg-white text-[var(--theme-hot)] flex flex-col justify-between relative overflow-hidden select-none font-sans ${
-        isGreenTheme ? "theme-green" : ""
-      }`}
+      className={`theme-surface min-h-screen bg-white text-[var(--theme-hot)] flex flex-col justify-between relative overflow-hidden select-none font-sans ${THEME_CLASS[siteTheme]}`}
     >
       <AnimatePresence>
         {themePulseKey > 0 && (
@@ -220,7 +257,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* ============================================================================== */}
-      {/* 1. RETRO-VINTAGE PINK-ON-WHITE LOADER */}
+      {/* 1. RETRO-VINTAGE LOADER */}
       {/* ============================================================================== */}
       <AnimatePresence>
         {loading && (
@@ -230,19 +267,27 @@ export default function App() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-6"
           >
-            <div className="w-[min(92vw,520px)] text-center space-y-5">
-              <pre className="mx-auto max-w-full whitespace-pre text-center [font-family:var(--font-ascii)] text-[3px] leading-[0.82] text-[var(--theme-hot)] drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.12)] sm:text-[3.8px] md:text-[4.5px]">
+            <div className="w-[min(94vw,580px)] text-center space-y-5">
+              <pre
+                className="loader-ascii-glow mx-auto max-w-full whitespace-pre text-center [font-family:var(--font-ascii)] text-[3px] leading-[0.82] sm:text-[3.8px] md:text-[4.5px]"
+                style={{ color: LOADER_GREEN }}
+              >
                 {loaderTitleAscii}
               </pre>
-              <div className="w-full h-[1px] bg-[var(--theme-hot)]/20 relative">
-                <motion.div
-                  className="absolute left-0 top-0 h-full bg-[var(--theme-hot)]"
-                  style={{ width: `${loadPercentage}%` }}
-                />
+              <div className="loader-bar-track">
+                <div className="loader-bar-rail">
+                  <motion.div
+                    className="loader-bar-fill"
+                    style={{ width: loadBarWidth }}
+                  />
+                </div>
               </div>
-              <div className="flex justify-between font-mono text-[8px] text-[var(--theme-hot)]/80 tracking-widest uppercase">
+              <div
+                className="flex justify-between font-mono text-[10px] tracking-widest uppercase tabular-nums"
+                style={{ color: `rgba(${LOADER_NAVY_RGB}, 0.8)` }}
+              >
                 <span>loading...</span>
-                <span>{loadPercentage}%</span>
+                <span>{displayPercent}%</span>
               </div>
             </div>
           </motion.div>
@@ -313,13 +358,13 @@ export default function App() {
                   rel="noreferrer"
                   whileHover={{ y: -3, scale: 1.08 }}
                   whileTap={{ scale: 0.94 }}
-                  className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
+                  className="social-link w-10 h-10 md:w-8 md:h-8 flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
                   aria-label={link.label}
                 >
                   <img
                     src={link.icon}
                     alt=""
-                    className="w-full h-full object-contain transition-[filter] duration-500 [filter:var(--theme-icon-filter)_drop-shadow(0_0_8px_rgba(var(--theme-rgb),0.55))]"
+                    className="social-icon w-full h-full object-contain"
                     draggable={false}
                   />
                 </motion.a>
@@ -330,7 +375,8 @@ export default function App() {
                 onClick={handleIntroduceClick}
                 whileHover={{
                   y: -3,
-                  boxShadow: "0px 12px 24px rgba(var(--theme-rgb), 0.18)",
+                  boxShadow:
+                    "0 16px 36px rgba(var(--theme-rgb), 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                 }}
                 whileTap={{
                   scale: 0.98,
@@ -342,13 +388,13 @@ export default function App() {
                   damping: 24,
                   mass: 0.6,
                 }}
-                className="relative z-10 w-full py-4 bg-white hover:bg-[var(--theme-light)]/40 border-2 border-[var(--theme-hot)] rounded text-xs font-mono tracking-widest text-[var(--theme-hot)] flex items-center justify-center space-x-2 transition-all cursor-pointer focus:outline-none"
+                className="liquid-glass-enter pixel-bevel-border relative z-10 w-full py-4 rounded-none text-xs font-pixel tracking-widest text-[var(--theme-hot)] flex items-center justify-center space-x-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 <span>[ ENTER ]</span>
               </motion.button>
               <BottomRightAsciiArt
-                isGreenTheme={isGreenTheme}
-                onToggleTheme={handleThemeToggle}
+                siteTheme={siteTheme}
+                onCycleTheme={handleThemeCycle}
               />
             </div>
           </div>
@@ -366,11 +412,11 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-white/20 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto"
           >
-            <div className="max-w-4xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-none overflow-hidden flex flex-col space-y-4 md:space-y-6 relative border border-white/45 p-4 md:p-8 rounded bg-white/55 shadow-[0_24px_80px_rgba(var(--theme-rgb),0.22)] backdrop-blur-2xl ring-1 ring-[var(--theme-hot)]/20 pointer-events-auto">
+            <div className="max-w-6xl lg:max-w-7xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-[min(92dvh,920px)] overflow-hidden flex flex-col space-y-4 md:space-y-6 relative border border-white/45 p-4 md:p-8 lg:p-10 rounded bg-white/55 shadow-[0_24px_80px_rgba(var(--theme-rgb),0.22)] backdrop-blur-2xl ring-1 ring-[var(--theme-hot)]/20 pointer-events-auto">
               {/* Header inside overlay */}
               <div className="flex justify-between items-start gap-4 border-b border-[var(--theme-hot)]/20 pb-3 md:pb-4 shrink-0">
                 <div className="min-w-0">
-                  <h2 className="font-serif italic text-2xl md:text-3xl text-[var(--theme-hot)] leading-none">
+                  <h2 className="font-pixel text-2xl md:text-3xl lg:text-4xl text-[var(--theme-hot)] leading-none">
                     About Me
                   </h2>
                 </div>
@@ -389,9 +435,9 @@ export default function App() {
               </div>
 
               {/* Composition Selection body split-view */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-stretch min-h-0 md:min-h-[340px] overflow-y-auto md:overflow-visible scrollbar-hidden pr-1 md:pr-0">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 lg:gap-10 items-stretch min-h-0 md:min-h-[480px] lg:min-h-[540px] overflow-y-auto md:overflow-visible scrollbar-hidden pr-1 md:pr-0">
                 {/* List items: Left */}
-                <div className="md:col-span-5 flex flex-col space-y-3 justify-start overflow-y-auto scrollbar-hidden max-h-[34dvh] md:max-h-[360px] pr-0 md:pr-2">
+                <div className="md:col-span-5 flex flex-col space-y-3 justify-start overflow-y-auto scrollbar-hidden max-h-[34dvh] md:max-h-[480px] lg:max-h-[540px] pr-0 md:pr-2">
                   {CURATED_PROJECTS.map((project) => (
                     <button
                       key={project.id}
@@ -403,14 +449,14 @@ export default function App() {
                       }}
                       className={`text-left p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[var(--theme-hot)]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[var(--theme-hot)] border-[var(--theme-hot)]/20 hover:border-[var(--theme-hot)]/50 hover:bg-white/55 backdrop-blur-md"}`}
                     >
-                      <div className="flex justify-between items-baseline font-mono text-[8px] opacity-85 mb-1">
+                      <div className="flex justify-between items-baseline font-mono text-[9px] md:text-[10px] opacity-85 mb-1">
                         <span>{project.navLabel}</span>
                         <span>[{project.num}]</span>
                       </div>
-                      <h3 className="font-serif text-base md:text-lg tracking-wide">
+                      <h3 className="font-pixel text-lg md:text-xl font-bold tracking-wide">
                         {project.title}
                       </h3>
-                      <p className="text-[10px] font-sans opacity-90 line-clamp-1 mt-1 font-light">
+                      <p className="font-pixel text-[11px] md:text-xs opacity-90 line-clamp-1 mt-1">
                         {project.subtitle}
                       </p>
                     </button>
@@ -418,11 +464,11 @@ export default function App() {
                 </div>
 
                 {/* Details view: Right */}
-                <div className="relative md:col-span-7 border border-dashed border-[var(--theme-hot)]/30 p-4 md:p-6 rounded bg-white/25 backdrop-blur-md flex flex-col justify-between min-h-[230px] md:min-h-0 overflow-hidden">
+                <div className="relative md:col-span-7 border border-dashed border-[var(--theme-hot)]/30 p-4 md:p-6 lg:p-8 rounded bg-white/25 backdrop-blur-md flex flex-col justify-between min-h-[230px] md:min-h-0 overflow-hidden">
                   {activeComposition ? (
                     activeComposition.id === "blush-chronicles" ? (
                       <div className="flex h-full min-h-0 flex-col space-y-4">
-                        <h3 className="font-serif italic text-xl md:text-2xl text-[var(--theme-hot)]">
+                        <h3 className="font-pixel text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
                           {activeComposition.title}
                         </h3>
                         <FishTimeline
@@ -432,11 +478,11 @@ export default function App() {
                     ) : (
                       <div className="space-y-4">
                         <div>
-                          <h3 className="font-serif italic text-xl md:text-2xl text-[var(--theme-hot)]">
+                          <h3 className="font-pixel text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
                             {activeComposition.title}
                           </h3>
                           {activeComposition.detailSubtitle && (
-                            <p className="font-mono text-[10px] text-[var(--theme-hot)]/85 mt-1.5 leading-relaxed">
+                            <p className="font-mono text-[11px] md:text-xs text-[var(--theme-hot)]/85 mt-1.5 leading-relaxed">
                               {activeComposition.detailSubtitle}
                               {activeComposition.articleUrl &&
                                 activeComposition.detailUrlLabel && (
@@ -472,13 +518,13 @@ export default function App() {
 
                         <div className="w-full h-[1px] bg-[var(--theme-hot)]/10" />
 
-                        <p className="font-serif text-sm leading-relaxed text-[var(--theme-hot)] font-light whitespace-pre-line">
+                        <p className="font-pixel text-base leading-relaxed text-[var(--theme-hot)] whitespace-pre-line">
                           "{activeComposition.description}"
                         </p>
 
                         {activeComposition.extraDetails.length > 0 && (
                           <div className="space-y-1.5 pt-2">
-                            <div className="text-[8px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                            <div className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
                               {activeComposition.featuresLabel ??
                                 "KINETIC ATTRIBUTES:"}
                             </div>
@@ -486,7 +532,7 @@ export default function App() {
                               (detail, dIdx) => (
                                 <div
                                   key={dIdx}
-                                  className="text-xs font-sans font-light flex items-start"
+                                  className="text-sm font-pixel flex items-start"
                                 >
                                   <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
                                     ▪
@@ -501,7 +547,7 @@ export default function App() {
                         {activeComposition.techStack &&
                           activeComposition.techStack.length > 0 && (
                             <div className="space-y-1.5 pt-2">
-                              <div className="text-[8px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                              <div className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
                                 {activeComposition.techStackLabel ??
                                   "TECH STACK:"}
                               </div>
@@ -509,7 +555,7 @@ export default function App() {
                                 (detail, dIdx) => (
                                   <div
                                     key={dIdx}
-                                    className="text-xs font-sans font-light flex items-start"
+                                    className="text-sm font-pixel flex items-start"
                                   >
                                     <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
                                       ▪
@@ -533,7 +579,7 @@ export default function App() {
                       <div className="absolute left-1/2 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-dashed border-[var(--theme-hot)]/40 animate-spin duration-3000">
                         <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full" />
                       </div>
-                      <p className="absolute left-1/2 bottom-[10%] z-10 -translate-x-1/2 font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/60">
+                      <p className="absolute left-1/2 bottom-[10%] z-10 -translate-x-1/2 font-mono text-[11px] md:text-xs uppercase tracking-widest text-[var(--theme-hot)]/60">
                         select something
                       </p>
                       <pre
@@ -554,7 +600,7 @@ export default function App() {
                   {showArticle && activeComposition?.articleUrl && (
                     <div className="absolute inset-2 md:inset-3 z-30 flex flex-col overflow-hidden rounded border border-[var(--theme-hot)]/30 bg-white/95 shadow-[0_18px_60px_rgba(var(--theme-rgb),0.22)] backdrop-blur-xl">
                       <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-3 py-2">
-                        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/75">
+                        <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/75">
                           article_view
                         </span>
                         <div className="flex items-center gap-2">
@@ -602,10 +648,10 @@ export default function App() {
                 >
                   <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
                     <div>
-                      <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
+                      <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/70">
                         extended_article_view
                       </p>
-                      <h3 className="font-serif italic text-lg text-[var(--theme-hot)] leading-tight">
+                      <h3 className="font-serif italic text-xl text-[var(--theme-hot)] leading-tight">
                         {activeComposition.title}
                       </h3>
                     </div>
@@ -643,10 +689,10 @@ export default function App() {
                   >
                     <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
                       <div>
-                        <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
+                        <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/70">
                           extended_fish_timeline
                         </p>
-                        <h3 className="font-serif italic text-lg text-[var(--theme-hot)] leading-tight">
+                        <h3 className="font-serif italic text-xl text-[var(--theme-hot)] leading-tight">
                           fish pics
                         </h3>
                       </div>

@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   motion,
+  AnimatePresence,
   useAnimationControls,
   useMotionValue,
   useSpring,
@@ -45,6 +46,7 @@ function FloralHalo({
 }: FloralHaloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [clickPulseKey, setClickPulseKey] = useState(0);
   const rawTiltX = useMotionValue(0);
   const rawTiltY = useMotionValue(0);
   const tiltX = useSpring(rawTiltX, { stiffness: 80, damping: 24 });
@@ -218,6 +220,9 @@ function FloralHalo({
 
       {/* Interaction Stage */}
       <motion.div
+        onClick={() => {
+          if (!isPaused) setClickPulseKey((key) => key + 1);
+        }}
         animate={{
           scale: isHovered && !isPaused ? 1.04 : 1.0,
         }}
@@ -227,8 +232,26 @@ function FloralHalo({
           willChange: "transform",
         }}
         transition={{ type: "spring", stiffness: 80, damping: 24 }}
-        className="w-[580px] h-[580px] flex items-center justify-center relative cursor-pointer"
+        className="w-[580px] h-[580px] flex items-center justify-center relative pixel-cursor-clickable"
       >
+        <AnimatePresence>
+          {clickPulseKey > 0 && (
+            <motion.div
+              key={clickPulseKey}
+              initial={{ opacity: 0.75, scale: 0.88 }}
+              animate={{ opacity: 0, scale: 1.22 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.95, ease: "easeOut" }}
+              className="pointer-events-none absolute inset-[-12%] z-[5] rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(var(--theme-rgb), 0.42) 0%, rgba(var(--theme-rgb), 0.18) 42%, rgba(var(--theme-rgb), 0) 72%)",
+                boxShadow:
+                  "0 0 48px rgba(var(--theme-rgb), 0.55), 0 0 96px rgba(var(--theme-rgb), 0.32)",
+              }}
+            />
+          )}
+        </AnimatePresence>
         {/* Soft glowing background center aura */}
         <div className={`absolute w-[400px] h-[400px] bg-[var(--theme-hot)]/20 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'}`} />
 
