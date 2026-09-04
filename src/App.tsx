@@ -420,7 +420,7 @@ export default function App() {
 
           {/* Interactive Composition Introductions Launcher */}
           <div className="w-full max-w-sm mx-auto lg:mx-0 pt-1 lg:pt-2 space-y-5 relative">
-            <div className="flex items-center justify-center lg:justify-start gap-5">
+            <div className="flex items-center justify-center gap-5">
               {SOCIAL_LINKS.map((link) => (
                 <motion.a
                   key={link.label}
