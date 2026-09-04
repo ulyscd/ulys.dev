@@ -10,7 +10,7 @@ import { CURATED_PROJECTS, ProjectCurated } from "./data/projects";
 import FloralHalo from "./components/FloralHalo";
 import PetalRain from "./components/PetalRain";
 import PixelGrid from "./components/PixelGrid";
-import BottomRightAsciiArt from "./components/BottomRightAsciiArt";
+import TopRightAsciiArt, { BlindReveal } from "./components/TopRightAsciiArt";
 import FishTimeline from "./components/FishTimeline";
 import loaderTitleAscii from "./assets/loader-title-ascii.txt?raw";
 import selectCenterBorderAscii from "./assets/select-center-border-ascii.txt?raw";
@@ -74,6 +74,11 @@ export default function App() {
   const [showExtendedArticle, setShowExtendedArticle] = useState(false);
   const [showFishTimelineExtended, setShowFishTimelineExtended] =
     useState(false);
+  const projectScrollRef = useRef<HTMLDivElement | null>(null);
+  const [projectScrollClip, setProjectScrollClip] = useState({
+    top: false,
+    bottom: false,
+  });
 
   // Active light bloom rays triggers
   const [burstActive, setBurstActive] = useState(false);
@@ -142,6 +147,64 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!showCompositions) {
+      setProjectScrollClip({ top: false, bottom: false });
+      return;
+    }
+
+    const scroller = projectScrollRef.current;
+    if (!scroller) return;
+
+    const updateClip = () => {
+      if (window.matchMedia("(min-width: 768px)").matches) {
+        setProjectScrollClip({ top: false, bottom: false });
+        return;
+      }
+
+      const containerRect = scroller.getBoundingClientRect();
+      let clipTop = false;
+      let clipBottom = false;
+
+      scroller.querySelectorAll<HTMLElement>("[data-project-item]").forEach((item) => {
+        const itemRect = item.getBoundingClientRect();
+        const visibleTop = Math.max(itemRect.top, containerRect.top);
+        const visibleBottom = Math.min(itemRect.bottom, containerRect.bottom);
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+        const ratio = itemRect.height > 0 ? visibleHeight / itemRect.height : 1;
+
+        // Intensify when a card is partially cut (around halfway through the edge).
+        const partiallyCut = ratio > 0.08 && ratio < 0.92;
+
+        if (partiallyCut && itemRect.top < containerRect.top - 1) {
+          clipTop = true;
+        }
+        if (partiallyCut && itemRect.bottom > containerRect.bottom + 1) {
+          clipBottom = true;
+        }
+      });
+
+      setProjectScrollClip((prev) =>
+        prev.top === clipTop && prev.bottom === clipBottom
+          ? prev
+          : { top: clipTop, bottom: clipBottom },
+      );
+    };
+
+    updateClip();
+    scroller.addEventListener("scroll", updateClip, { passive: true });
+    window.addEventListener("resize", updateClip);
+
+    const resizeObserver = new ResizeObserver(updateClip);
+    resizeObserver.observe(scroller);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateClip);
+      window.removeEventListener("resize", updateClip);
+      resizeObserver.disconnect();
+    };
+  }, [showCompositions, activeComposition]);
+
   const handleIntroduceClick = () => {
     setShowCompositions(true);
     setBurstActive(true);
@@ -165,6 +228,14 @@ export default function App() {
       onMouseMove={handleMouseMove}
       className={`theme-surface min-h-screen bg-white text-[var(--theme-hot)] flex flex-col justify-between relative overflow-hidden select-none font-sans ${THEME_CLASS[siteTheme]}`}
     >
+      {!loading && (
+        <TopRightAsciiArt
+          siteTheme={siteTheme}
+          onCycleTheme={handleThemeCycle}
+          isObscured={showCompositions}
+          playIntro
+        />
+      )}
       <AnimatePresence>
         {themePulseKey > 0 && (
           <motion.div
@@ -314,13 +385,13 @@ export default function App() {
       {/* ============================================================================== */}
       {/* MAIN VIEWPORT FRAME */}
       {/* ============================================================================== */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 md:grid-cols-12 items-center relative gap-4 md:gap-8 z-30 py-2 md:py-4">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-12 items-center relative gap-4 lg:gap-8 z-30 py-2 lg:py-4">
         {/* LEFT COLUMN: ENLARGED GRAPHIC AND HALFWAY OFF-SCREEN POSITION */}
-        <div className="order-2 md:order-1 md:col-span-7 flex items-center justify-center md:justify-start h-[170px] md:h-[620px] relative pointer-events-none select-none opacity-70 md:opacity-100 -mt-4 md:mt-0">
-          <div className="absolute left-1/2 md:left-[-420px] -translate-x-1/2 md:translate-x-0 w-[360px] h-[360px] md:w-[840px] md:h-[840px] flex items-center justify-center">
+        <div className="order-2 lg:order-1 lg:col-span-7 flex items-center justify-center lg:justify-start h-[200px] sm:h-[260px] md:h-[300px] lg:h-[620px] relative pointer-events-none select-none opacity-70 lg:opacity-100 -mt-2 sm:mt-0 lg:mt-0">
+          <div className="absolute left-1/2 lg:left-[-420px] -translate-x-1/2 lg:translate-x-0 w-[360px] h-[360px] sm:w-[420px] sm:h-[420px] md:w-[480px] md:h-[480px] lg:w-[840px] lg:h-[840px] flex items-center justify-center">
             {/* The halo itself is magnified for a majestic cinematic appearance */}
             <FloralHalo
-              className="w-full h-full scale-[0.88] md:scale-[1.6]"
+              className="w-full h-full scale-[0.88] sm:scale-[0.95] md:scale-[1.05] lg:scale-[1.6]"
               isPaused={showCompositions}
               playIntro={!loading}
             />
@@ -328,17 +399,17 @@ export default function App() {
         </div>
 
         {/* RIGHT COLUMN: REFINED PURE WHITE INTERFACE */}
-        <div className="order-1 md:order-2 md:col-span-5 flex flex-col items-center md:items-start justify-center space-y-6 md:space-y-8 text-center md:text-left md:pl-8 pointer-events-auto pt-2 md:pt-0">
+        <div className="order-1 lg:order-2 lg:col-span-5 flex flex-col items-center lg:items-start justify-center space-y-6 md:space-y-7 lg:space-y-8 text-center lg:text-left lg:pl-8 pointer-events-auto pt-2 lg:pt-0 mx-auto lg:mx-0 w-full max-w-md lg:max-w-none">
           {/* Elite Title Heading & Underlined structures */}
-          <div className="space-y-3">
-            <h1 className="font-serif italic text-4xl sm:text-5xl md:text-6xl text-[var(--theme-hot)] tracking-wide leading-none select-none">
+          <BlindReveal playIntro={!loading} className="space-y-3">
+            <h1 className="font-serif italic text-4xl sm:text-5xl md:text-5xl lg:text-6xl text-[var(--theme-hot)] tracking-wide leading-none select-none">
               ulys drumrongthai
             </h1>
-            <div className="w-24 h-[1px] bg-[var(--theme-hot)]/40 mx-auto md:mx-0" />
-          </div>
+            <div className="w-24 h-[1px] bg-[var(--theme-hot)]/40 mx-auto lg:mx-0" />
+          </BlindReveal>
 
           {/* Bio statement description */}
-          <div className="space-y-4 max-w-sm">
+          <div className="space-y-4 max-w-sm mx-auto lg:mx-0">
             <p className="font-sans text-xs text-[var(--theme-hot)]/80 uppercase tracking-widest leading-relaxed">
               (yoo-lis)
             </p>
@@ -348,8 +419,8 @@ export default function App() {
           </div>
 
           {/* Interactive Composition Introductions Launcher */}
-          <div className="w-full max-w-sm pt-1 md:pt-2 space-y-5 relative">
-            <div className="flex items-center justify-center gap-5">
+          <div className="w-full max-w-sm mx-auto lg:mx-0 pt-1 lg:pt-2 space-y-5 relative">
+            <div className="flex items-center justify-center lg:justify-start gap-5">
               {SOCIAL_LINKS.map((link) => (
                 <motion.a
                   key={link.label}
@@ -358,7 +429,7 @@ export default function App() {
                   rel="noreferrer"
                   whileHover={{ y: -3, scale: 1.08 }}
                   whileTap={{ scale: 0.94 }}
-                  className="social-link w-10 h-10 md:w-8 md:h-8 flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
+                  className="social-link w-10 h-10 lg:w-8 lg:h-8 flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
                   aria-label={link.label}
                 >
                   <img
@@ -392,10 +463,6 @@ export default function App() {
               >
                 <span>[ ENTER ]</span>
               </motion.button>
-              <BottomRightAsciiArt
-                siteTheme={siteTheme}
-                onCycleTheme={handleThemeCycle}
-              />
             </div>
           </div>
         </div>
@@ -412,11 +479,11 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-white/20 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 overflow-y-auto"
           >
-            <div className="max-w-6xl lg:max-w-7xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-[min(92dvh,920px)] overflow-hidden flex flex-col space-y-4 md:space-y-6 relative border border-white/45 p-4 md:p-8 lg:p-10 rounded bg-white/55 shadow-[0_24px_80px_rgba(var(--theme-rgb),0.22)] backdrop-blur-2xl ring-1 ring-[var(--theme-hot)]/20 pointer-events-auto">
+            <div className="max-w-6xl lg:max-w-7xl w-full max-h-[calc(100dvh-1.5rem)] md:max-h-[min(92dvh,920px)] overflow-hidden flex flex-col space-y-3 md:space-y-6 relative border border-white/45 p-3 sm:p-4 md:p-8 lg:p-10 rounded bg-white/55 shadow-[0_24px_80px_rgba(var(--theme-rgb),0.22)] backdrop-blur-2xl ring-1 ring-[var(--theme-hot)]/20 pointer-events-auto">
               {/* Header inside overlay */}
-              <div className="flex justify-between items-start gap-4 border-b border-[var(--theme-hot)]/20 pb-3 md:pb-4 shrink-0">
+              <div className="flex justify-between items-start gap-4 border-b border-[var(--theme-hot)]/20 pb-2.5 md:pb-4 shrink-0">
                 <div className="min-w-0">
-                  <h2 className="font-pixel text-2xl md:text-3xl lg:text-4xl text-[var(--theme-hot)] leading-none">
+                  <h2 className="font-pixel text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[var(--theme-hot)] leading-none">
                     About Me
                   </h2>
                 </div>
@@ -435,28 +502,40 @@ export default function App() {
               </div>
 
               {/* Composition Selection body split-view */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 lg:gap-10 items-stretch min-h-0 md:min-h-[480px] lg:min-h-[540px] overflow-y-auto md:overflow-visible scrollbar-hidden pr-1 md:pr-0">
+              <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-8 lg:gap-10 min-h-0 flex-1 overflow-hidden items-stretch md:min-h-[480px] lg:min-h-[540px]">
                 {/* List items: Left */}
-                <div className="md:col-span-5 flex flex-col space-y-3 justify-start overflow-y-auto scrollbar-hidden max-h-[34dvh] md:max-h-[480px] lg:max-h-[540px] pr-0 md:pr-2">
+                <div
+                  ref={projectScrollRef}
+                  className={`about-project-scroll md:col-span-5 flex flex-col space-y-2 md:space-y-3 justify-start overflow-y-auto scrollbar-hidden shrink-0 md:shrink md:max-h-[480px] lg:max-h-[540px] pr-0 md:pr-2 ${
+                    activeComposition
+                      ? "max-h-[22dvh] sm:max-h-[26dvh]"
+                      : "max-h-[34dvh] sm:max-h-[38dvh] md:max-h-[480px]"
+                  }${projectScrollClip.top ? " about-project-scroll--clip-top" : ""}${
+                    projectScrollClip.bottom
+                      ? " about-project-scroll--clip-bottom"
+                      : ""
+                  }`}
+                >
                   {CURATED_PROJECTS.map((project) => (
                     <button
                       key={project.id}
+                      data-project-item
                       onClick={() => {
                         setActiveComposition(project);
                         setShowArticle(false);
                         setShowExtendedArticle(false);
                         setShowFishTimelineExtended(false);
                       }}
-                      className={`text-left p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[var(--theme-hot)]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[var(--theme-hot)] border-[var(--theme-hot)]/20 hover:border-[var(--theme-hot)]/50 hover:bg-white/55 backdrop-blur-md"}`}
+                      className={`text-left p-2.5 sm:p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[var(--theme-hot)]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[var(--theme-hot)] border-[var(--theme-hot)]/20 hover:border-[var(--theme-hot)]/50 hover:bg-white/55 backdrop-blur-md"}`}
                     >
-                      <div className="flex justify-between items-baseline font-mono text-[9px] md:text-[10px] opacity-85 mb-1">
+                      <div className="flex justify-between items-baseline font-mono text-[9px] md:text-[10px] opacity-85 mb-0.5 md:mb-1">
                         <span>{project.navLabel}</span>
                         <span>[{project.num}]</span>
                       </div>
-                      <h3 className="font-pixel text-lg md:text-xl font-bold tracking-wide">
+                      <h3 className="font-pixel text-base sm:text-lg md:text-xl font-bold tracking-wide">
                         {project.title}
                       </h3>
-                      <p className="font-pixel text-[11px] md:text-xs opacity-90 line-clamp-1 mt-1">
+                      <p className="font-pixel text-[11px] md:text-xs opacity-90 line-clamp-1 mt-0.5 md:mt-1">
                         {project.subtitle}
                       </p>
                     </button>
@@ -464,21 +543,29 @@ export default function App() {
                 </div>
 
                 {/* Details view: Right */}
-                <div className="relative md:col-span-7 border border-dashed border-[var(--theme-hot)]/30 p-4 md:p-6 lg:p-8 rounded bg-white/25 backdrop-blur-md flex flex-col justify-between min-h-[230px] md:min-h-0 overflow-hidden">
+                <div
+                  className={`relative md:col-span-7 border border-dashed border-[var(--theme-hot)]/30 p-3 sm:p-4 md:p-6 lg:p-8 rounded bg-white/25 backdrop-blur-md flex flex-col overflow-hidden ${
+                    activeComposition
+                      ? "min-h-0 flex-1"
+                      : "h-[150px] max-h-[28dvh] shrink-0 md:h-auto md:max-h-none md:min-h-0 md:flex-1"
+                  }`}
+                >
                   {activeComposition ? (
                     activeComposition.id === "blush-chronicles" ? (
-                      <div className="flex h-full min-h-0 flex-col space-y-4">
-                        <h3 className="font-pixel text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
+                      <div className="flex h-full min-h-0 flex-col space-y-3 md:space-y-4 overflow-hidden">
+                        <h3 className="shrink-0 font-pixel text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
                           {activeComposition.title}
                         </h3>
-                        <FishTimeline
-                          onExtend={() => setShowFishTimelineExtended(true)}
-                        />
+                        <div className="min-h-0 flex-1 overflow-hidden">
+                          <FishTimeline
+                            onExtend={() => setShowFishTimelineExtended(true)}
+                          />
+                        </div>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden space-y-4 pr-1">
                         <div>
-                          <h3 className="font-pixel text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
+                          <h3 className="font-pixel text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
                             {activeComposition.title}
                           </h3>
                           {activeComposition.detailSubtitle && (
@@ -518,7 +605,7 @@ export default function App() {
 
                         <div className="w-full h-[1px] bg-[var(--theme-hot)]/10" />
 
-                        <p className="font-pixel text-base leading-relaxed text-[var(--theme-hot)] whitespace-pre-line">
+                        <p className="font-pixel text-sm sm:text-base leading-relaxed text-[var(--theme-hot)] whitespace-pre-line">
                           "{activeComposition.description}"
                         </p>
 
@@ -546,7 +633,7 @@ export default function App() {
 
                         {activeComposition.techStack &&
                           activeComposition.techStack.length > 0 && (
-                            <div className="space-y-1.5 pt-2">
+                            <div className="space-y-1.5 pt-2 pb-2">
                               <div className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
                                 {activeComposition.techStackLabel ??
                                   "TECH STACK:"}
@@ -569,28 +656,28 @@ export default function App() {
                       </div>
                     )
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden text-center">
+                    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden text-center">
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute left-1/2 top-1/2 z-0 max-h-[58%] max-w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center font-mono text-[4.2px] leading-[0.82] text-[var(--theme-hot)]/32 drop-shadow-[0_0_12px_rgba(var(--theme-rgb),0.1)] sm:text-[5px] md:text-[6px]"
+                        className="pointer-events-none absolute left-1/2 top-[42%] z-0 max-h-[70%] max-w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-hidden whitespace-pre text-center font-mono text-[2.6px] leading-[0.82] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[3.4px] md:top-1/2 md:max-h-[58%] md:max-w-[72%] md:text-[6px] md:text-[var(--theme-hot)]/32"
                       >
                         {selectCenterBorderAscii}
                       </pre>
-                      <div className="absolute left-1/2 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-dashed border-[var(--theme-hot)]/40 animate-spin duration-3000">
+                      <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-[var(--theme-hot)]/40 animate-spin duration-3000 md:absolute md:left-1/2 md:top-1/2 md:h-8 md:w-8 md:-translate-x-1/2 md:-translate-y-1/2">
                         <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full" />
                       </div>
-                      <p className="absolute left-1/2 bottom-[10%] z-10 -translate-x-1/2 font-mono text-[11px] md:text-xs uppercase tracking-widest text-[var(--theme-hot)]/60">
+                      <p className="relative z-10 mt-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/65 md:absolute md:bottom-[10%] md:left-1/2 md:mt-0 md:-translate-x-1/2 md:text-xs md:text-[var(--theme-hot)]/60">
                         select something
                       </p>
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute -bottom-[1px] right-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-right [font-family:var(--font-ascii)] text-[1.35px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[1.65px] md:right-8 md:text-[1.95px]"
+                        className="pointer-events-none absolute -bottom-[1px] right-2 z-0 max-h-[38%] max-w-[34%] overflow-hidden whitespace-pre text-right [font-family:var(--font-ascii)] text-[1px] leading-[0.78] text-[var(--theme-hot)]/22 drop-shadow-[0_0_8px_rgba(var(--theme-rgb),0.08)] sm:right-3 sm:text-[1.2px] md:right-8 md:max-h-[42%] md:max-w-[42%] md:text-[1.95px] md:text-[var(--theme-hot)]/28"
                       >
                         {selectWindowAscii.trimEnd()}
                       </pre>
                       <pre
                         aria-hidden="true"
-                        className="pointer-events-none absolute -bottom-[1px] left-5 z-0 max-h-[42%] max-w-[42%] overflow-hidden whitespace-pre text-left [font-family:var(--font-ascii)] text-[2.025px] leading-[0.78] text-[var(--theme-hot)]/28 drop-shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)] sm:text-[2.475px] md:left-8 md:text-[2.925px]"
+                        className="pointer-events-none absolute -bottom-[1px] left-2 z-0 max-h-[38%] max-w-[34%] overflow-hidden whitespace-pre text-left [font-family:var(--font-ascii)] text-[1.4px] leading-[0.78] text-[var(--theme-hot)]/22 drop-shadow-[0_0_8px_rgba(var(--theme-rgb),0.08)] sm:left-3 sm:text-[1.7px] md:left-8 md:max-h-[42%] md:max-w-[42%] md:text-[2.925px] md:text-[var(--theme-hot)]/28"
                       >
                         {selectLeftAscii.trimEnd()}
                       </pre>
@@ -599,31 +686,26 @@ export default function App() {
 
                   {showArticle && activeComposition?.articleUrl && (
                     <div className="absolute inset-2 md:inset-3 z-30 flex flex-col overflow-hidden rounded border border-[var(--theme-hot)]/30 bg-white/95 shadow-[0_18px_60px_rgba(var(--theme-rgb),0.22)] backdrop-blur-xl">
-                      <div className="flex items-center justify-between border-b border-[var(--theme-hot)]/15 px-3 py-2">
-                        <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/75">
-                          article_view
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowExtendedArticle(true)}
-                            className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
-                            aria-label="Extend article view"
-                          >
-                            <Maximize2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowArticle(false);
-                              setShowExtendedArticle(false);
-                            }}
-                            className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
-                            aria-label="Close article"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <div className="pointer-events-none absolute right-2 top-2 z-40 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowExtendedArticle(true)}
+                          className="pointer-events-auto shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded bg-white/90 hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)]"
+                          aria-label="Extend article view"
+                        >
+                          <Maximize2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowArticle(false);
+                            setShowExtendedArticle(false);
+                          }}
+                          className="pointer-events-auto shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded-full bg-white/90 hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)]"
+                          aria-label="Close article"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
                       <iframe
                         src={getPdfViewerUrl(activeComposition.articleUrl)}
@@ -646,22 +728,14 @@ export default function App() {
                   data-testid="extended-article-view"
                   className="liquid-glass-panel fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 flex flex-col"
                 >
-                  <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
-                    <div>
-                      <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/70">
-                        extended_article_view
-                      </p>
-                      <h3 className="font-serif italic text-xl text-[var(--theme-hot)] leading-tight">
-                        {activeComposition.title}
-                      </h3>
-                    </div>
+                  <div className="pointer-events-none absolute right-3 top-3 z-40">
                     <button
                       type="button"
                       onClick={() => {
                         setShowArticle(false);
                         setShowExtendedArticle(false);
                       }}
-                      className="shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                      className="pointer-events-auto shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full bg-white/90 hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)]"
                       aria-label="Close article"
                     >
                       <X className="w-5 h-5" />
@@ -687,25 +761,17 @@ export default function App() {
                     data-testid="extended-fish-timeline-view"
                     className="liquid-glass-panel fixed inset-y-0 right-0 z-[80] w-full md:w-1/2 flex flex-col"
                   >
-                    <div className="liquid-glass-header flex items-center justify-between px-4 py-3">
-                      <div>
-                        <p className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/70">
-                          extended_fish_timeline
-                        </p>
-                        <h3 className="font-serif italic text-xl text-[var(--theme-hot)] leading-tight">
-                          fish pics
-                        </h3>
-                      </div>
+                    <div className="pointer-events-none absolute right-3 top-3 z-40">
                       <button
                         type="button"
                         onClick={() => setShowFishTimelineExtended(false)}
-                        className="shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
+                        className="pointer-events-auto shrink-0 p-1.5 border border-[var(--theme-hot)]/30 rounded-full bg-white/90 hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)]"
                         aria-label="Close fish timeline"
                       >
                         <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <div className="liquid-glass-body relative z-10 min-h-0 flex-1 p-3 md:p-4">
+                    <div className="liquid-glass-body relative z-10 min-h-0 flex-1 p-3 md:p-4 pt-12">
                       <FishTimeline variant="extended" />
                     </div>
                   </motion.div>

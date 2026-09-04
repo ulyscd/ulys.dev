@@ -181,6 +181,55 @@
   animation: theme-ascii-glow-pulse 2.4s ease-in-out infinite;
 }
 
+/* Same as theme-ascii-glow, plus one softer farther outer drop-shadow. */
+@keyframes top-right-ascii-glow-pulse {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 0 8px rgba(var(--theme-rgb), 0.34))
+      drop-shadow(0 0 20px rgba(var(--theme-rgb), 0.22))
+      drop-shadow(0 0 34px rgba(var(--theme-rgb), 0.12))
+      drop-shadow(0 0 72px rgba(var(--theme-rgb), 0.08));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 0 14px rgba(var(--theme-rgb), 0.62))
+      drop-shadow(0 0 30px rgba(var(--theme-rgb), 0.42))
+      drop-shadow(0 0 48px rgba(var(--theme-rgb), 0.28))
+      drop-shadow(0 0 96px rgba(var(--theme-rgb), 0.14));
+  }
+}
+
+.top-right-ascii-glow {
+  animation: top-right-ascii-glow-pulse 2.4s ease-in-out infinite;
+}
+
+/*
+ * Soft-fade ONLY the glow layer. Solid glyphs sit unmasked on top,
+ * so the art stays crisp while the drop-shadow dissolves at the edges.
+ */
+.top-right-ascii-glow-fade {
+  -webkit-mask-image: radial-gradient(
+    140% 140% at 100% 0%,
+    #000 40%,
+    rgba(0, 0, 0, 0.7) 62%,
+    rgba(0, 0, 0, 0.25) 82%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    140% 140% at 100% 0%,
+    #000 40%,
+    rgba(0, 0, 0, 0.7) 62%,
+    rgba(0, 0, 0, 0.25) 82%,
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
 .theme-shift-wash {
   background: linear-gradient(
     to top,
@@ -275,6 +324,34 @@ select {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+/* Mobile scroll cue for About Me project list */
+@media (max-width: 767px) {
+  .about-project-scroll {
+    box-shadow:
+      inset 0 14px 18px -12px rgba(var(--theme-rgb), 0.28),
+      inset 0 -20px 24px -14px rgba(var(--theme-rgb), 0.36);
+    transition: box-shadow 220ms ease;
+  }
+
+  .about-project-scroll.about-project-scroll--clip-top {
+    box-shadow:
+      inset 0 24px 30px -8px rgba(var(--theme-rgb), 0.58),
+      inset 0 -20px 24px -14px rgba(var(--theme-rgb), 0.36);
+  }
+
+  .about-project-scroll.about-project-scroll--clip-bottom {
+    box-shadow:
+      inset 0 14px 18px -12px rgba(var(--theme-rgb), 0.28),
+      inset 0 -30px 34px -8px rgba(var(--theme-rgb), 0.64);
+  }
+
+  .about-project-scroll.about-project-scroll--clip-top.about-project-scroll--clip-bottom {
+    box-shadow:
+      inset 0 24px 30px -8px rgba(var(--theme-rgb), 0.58),
+      inset 0 -30px 34px -8px rgba(var(--theme-rgb), 0.64);
+  }
 }
 
 .liquid-glass-panel {

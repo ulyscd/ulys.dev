@@ -140,36 +140,31 @@ export default function FishTimeline({
         isExtended ? "flex h-full flex-col" : "h-[330px] md:h-[390px]"
       }`}
     >
-      <div className="relative z-20 flex items-center justify-between gap-2 border-b border-[var(--theme-hot)]/15 bg-white/80 px-3 py-2">
-        <span className="font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)]/70">
-          fish_timeline
-        </span>
-        <div className="flex items-center gap-2">
-          {!isExtended && onExtend && (
-            <button
-              type="button"
-              onClick={onExtend}
-              className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
-              aria-label="Extend fish timeline view"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </button>
-          )}
+      <div className="pointer-events-none absolute right-2 top-2 z-30 flex items-center gap-2">
+        {!isExtended && onExtend && (
           <button
             type="button"
-            onClick={handleGoToBottom}
-            className="shrink-0 p-1 border border-[var(--theme-hot)]/30 rounded hover:bg-[var(--theme-light)] text-[var(--theme-hot)] transition-all cursor-pointer focus:outline-none"
-            aria-label="Go to bottom of fish timeline"
+            onClick={onExtend}
+            className="pointer-events-auto shrink-0 rounded border border-[var(--theme-hot)]/30 bg-white/90 p-1 text-[var(--theme-hot)] shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)] transition-all hover:bg-[var(--theme-light)] focus:outline-none cursor-pointer"
+            aria-label="Extend fish timeline view"
           >
-            <ArrowDownToLine className="h-4 w-4" />
+            <Maximize2 className="h-4 w-4" />
           </button>
-        </div>
+        )}
+        <button
+          type="button"
+          onClick={handleGoToBottom}
+          className="pointer-events-auto shrink-0 rounded border border-[var(--theme-hot)]/30 bg-white/90 p-1 text-[var(--theme-hot)] shadow-[0_8px_20px_rgba(var(--theme-rgb),0.12)] transition-all hover:bg-[var(--theme-light)] focus:outline-none cursor-pointer"
+          aria-label="Go to bottom of fish timeline"
+        >
+          <ArrowDownToLine className="h-4 w-4" />
+        </button>
       </div>
 
       <div
         ref={scrollRef}
         className={`relative min-h-0 snap-y snap-mandatory overflow-y-auto scrollbar-hidden ${
-          isExtended ? "flex-1" : "h-[calc(100%-41px)]"
+          isExtended ? "flex-1" : "h-full"
         }`}
         data-testid={`fish-timeline-${variant}`}
       >
@@ -186,7 +181,7 @@ export default function FishTimeline({
             <section
               key={`${item.src}-${item.date}`}
               className={`relative z-10 flex snap-start items-center justify-center px-4 py-7 ${
-                isExtended ? "min-h-[calc(100dvh-86px)]" : "h-full"
+                isExtended ? "min-h-[calc(100dvh-72px)]" : "h-full"
               }`}
             >
               <button
@@ -215,14 +210,14 @@ export default function FishTimeline({
                   }`}
                   draggable={false}
                 />
-                <span className="absolute right-2 top-2 rounded border border-[var(--theme-hot)]/40 bg-white/90 px-2 py-1 font-mono text-[8px] uppercase tracking-widest text-[var(--theme-hot)] shadow-[0_8px_20px_rgba(var(--theme-rgb),0.14)]">
+                <span className="absolute right-2 top-2 rounded border border-[var(--theme-hot)]/40 bg-white/90 px-2.5 py-1 font-mono text-[11px] md:text-xs uppercase tracking-widest text-[var(--theme-hot)] shadow-[0_8px_20px_rgba(var(--theme-rgb),0.14)]">
                   {item.date}
                 </span>
                 {hoveredIndex === index && (
                   <span
-                    className="pointer-events-none absolute z-20 max-w-[220px] rounded border border-[var(--theme-hot)]/30 bg-white/95 px-2 py-1 text-left font-mono text-[9px] leading-snug text-[var(--theme-hot)] shadow-[0_8px_22px_rgba(var(--theme-rgb),0.18)]"
+                    className="pointer-events-none absolute z-20 w-max max-w-[min(280px,calc(100%-1rem))] rounded border border-[var(--theme-hot)]/30 bg-white/95 px-2.5 py-1.5 text-left font-mono text-[12px] md:text-[13px] leading-snug text-[var(--theme-hot)] shadow-[0_8px_22px_rgba(var(--theme-rgb),0.18)]"
                     style={{
-                      left: Math.min(cursorPosition.x + 12, 300),
+                      left: Math.min(cursorPosition.x + 12, 260),
                       top: Math.max(cursorPosition.y - 10, 8),
                     }}
                   >
@@ -230,7 +225,7 @@ export default function FishTimeline({
                   </span>
                 )}
                 {revealedIndex === index && (
-                  <span className="pointer-events-none absolute bottom-4 left-1/2 z-20 w-[calc(100%-2rem)] -translate-x-1/2 rounded border border-[var(--theme-hot)]/30 bg-white/95 px-3 py-2 text-center font-mono text-[10px] leading-snug text-[var(--theme-hot)] shadow-[0_8px_24px_rgba(var(--theme-rgb),0.2)]">
+                  <span className="pointer-events-none absolute bottom-4 left-1/2 z-20 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded border border-[var(--theme-hot)]/30 bg-white/95 px-3.5 py-2 text-center font-mono text-[13px] md:text-sm leading-snug text-[var(--theme-hot)] shadow-[0_8px_24px_rgba(var(--theme-rgb),0.2)]">
                     {item.caption}
                   </span>
                 )}
