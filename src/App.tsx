@@ -550,14 +550,14 @@ export default function App() {
                       }}
                       className={`text-left p-2.5 sm:p-3 md:p-4 rounded border transition-all duration-300 focus:outline-none cursor-pointer ${activeComposition?.id === project.id ? "bg-[var(--theme-hot)]/85 text-white border-white/40 shadow backdrop-blur-md" : "bg-white/35 text-[var(--theme-hot)] border-[var(--theme-hot)]/20 hover:border-[var(--theme-hot)]/50 hover:bg-white/55 backdrop-blur-md"}`}
                     >
-                      <div className="flex justify-between items-baseline font-mono text-[9px] md:text-[10px] opacity-85 mb-0.5 md:mb-1">
+                      <div className="flex justify-between items-baseline font-mono text-[11px] md:text-xs opacity-85 mb-0.5 md:mb-1">
                         <span>{project.navLabel}</span>
                         <span>[{project.num}]</span>
                       </div>
-                      <h3 className="font-pixel text-base sm:text-lg md:text-xl font-bold tracking-wide">
+                      <h3 className="font-pixel text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
                         {project.title}
                       </h3>
-                      <p className="font-pixel text-[11px] md:text-xs opacity-90 line-clamp-1 mt-0.5 md:mt-1">
+                      <p className="font-pixel text-[13px] md:text-sm opacity-90 line-clamp-1 mt-0.5 md:mt-1">
                         {project.subtitle}
                       </p>
                     </button>
@@ -575,7 +575,7 @@ export default function App() {
                   {activeComposition ? (
                     activeComposition.id === "blush-chronicles" ? (
                       <div className="flex h-full min-h-0 flex-col space-y-3 md:space-y-4 overflow-hidden">
-                        <h3 className="shrink-0 font-pixel text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
+                        <h3 className="shrink-0 font-pixel text-2xl sm:text-[1.75rem] md:text-[2.125rem] font-bold text-[var(--theme-hot)]">
                           {activeComposition.title}
                         </h3>
                         <div className="min-h-0 flex-1 overflow-hidden">
@@ -587,11 +587,11 @@ export default function App() {
                     ) : (
                       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden space-y-4 pr-1">
                         <div>
-                          <h3 className="font-pixel text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-hot)]">
+                          <h3 className="font-pixel text-2xl sm:text-[1.75rem] md:text-[2.125rem] font-bold text-[var(--theme-hot)]">
                             {activeComposition.title}
                           </h3>
                           {activeComposition.detailSubtitle && (
-                            <p className="font-mono text-[11px] md:text-xs text-[var(--theme-hot)]/85 mt-1.5 leading-relaxed">
+                            <p className="font-mono text-[13px] md:text-sm text-[var(--theme-hot)]/85 mt-1.5 leading-relaxed">
                               {activeComposition.detailSubtitle}
                               {activeComposition.articleUrl &&
                                 activeComposition.detailUrlLabel && (
@@ -627,13 +627,13 @@ export default function App() {
 
                         <div className="w-full h-[1px] bg-[var(--theme-hot)]/10" />
 
-                        <p className="font-pixel text-sm sm:text-base leading-relaxed text-[var(--theme-hot)] whitespace-pre-line">
+                        <p className="font-pixel text-base sm:text-lg leading-relaxed text-[var(--theme-hot)] whitespace-pre-line">
                           "{activeComposition.description}"
                         </p>
 
                         {activeComposition.extraDetails.length > 0 && (
                           <div className="space-y-1.5 pt-2">
-                            <div className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                            <div className="text-[11px] md:text-xs font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
                               {activeComposition.featuresLabel ??
                                 "KINETIC ATTRIBUTES:"}
                             </div>
@@ -641,7 +641,7 @@ export default function App() {
                               (detail, dIdx) => (
                                 <div
                                   key={dIdx}
-                                  className="text-sm font-pixel flex items-start"
+                                  className="text-base font-pixel flex items-start"
                                 >
                                   <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
                                     ▪
@@ -656,7 +656,7 @@ export default function App() {
                         {activeComposition.techStack &&
                           activeComposition.techStack.length > 0 && (
                             <div className="space-y-1.5 pt-2 pb-2">
-                              <div className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
+                              <div className="text-[11px] md:text-xs font-mono uppercase tracking-widest text-[var(--theme-hot)] font-bold">
                                 {activeComposition.techStackLabel ??
                                   "TECH STACK:"}
                               </div>
@@ -664,7 +664,7 @@ export default function App() {
                                 (detail, dIdx) => (
                                   <div
                                     key={dIdx}
-                                    className="text-sm font-pixel flex items-start"
+                                    className="text-base font-pixel flex items-start"
                                   >
                                     <span className="text-[var(--theme-hot)] mr-1.5 opacity-80">
                                       ▪
@@ -688,7 +688,7 @@ export default function App() {
                       <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-[var(--theme-hot)]/40 animate-spin duration-3000 md:absolute md:left-1/2 md:top-1/2 md:h-8 md:w-8 md:-translate-x-1/2 md:-translate-y-1/2">
                         <span className="w-1.5 h-1.5 bg-[var(--theme-hot)] rounded-full" />
                       </div>
-                      <p className="relative z-10 mt-2.5 font-mono text-[10px] uppercase tracking-widest text-[var(--theme-hot)]/65 md:absolute md:bottom-[10%] md:left-1/2 md:mt-0 md:-translate-x-1/2 md:text-xs md:text-[var(--theme-hot)]/60">
+                      <p className="relative z-10 mt-2.5 font-mono text-xs uppercase tracking-widest text-[var(--theme-hot)]/65 md:absolute md:bottom-[10%] md:left-1/2 md:mt-0 md:-translate-x-1/2 md:text-sm md:text-[var(--theme-hot)]/60">
                         select something
                       </p>
                       <pre
