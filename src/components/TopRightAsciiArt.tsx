@@ -7,6 +7,8 @@ type SiteTheme = "pink" | "green" | "navy" | "black";
 interface TopRightAsciiArtProps {
   siteTheme: SiteTheme;
   onCycleTheme: () => void;
+  /** Receives the button while a mouse hovers it, then null when it leaves. */
+  onHoverChange?: (target: HTMLElement | null) => void;
   /** When true, sit under the about/compositions overlay and block theme cycling. */
   isObscured?: boolean;
   playIntro?: boolean;
@@ -59,6 +61,7 @@ function BlindReveal({
 export default function TopRightAsciiArt({
   siteTheme,
   onCycleTheme,
+  onHoverChange,
   isObscured = false,
   playIntro = true,
 }: TopRightAsciiArtProps) {
@@ -84,6 +87,11 @@ export default function TopRightAsciiArt({
             event.preventDefault();
             onCycleTheme();
           }}
+          onPointerEnter={(event) => {
+            if (isObscured || event.pointerType === "touch") return;
+            onHoverChange?.(event.currentTarget);
+          }}
+          onPointerLeave={() => onHoverChange?.(null)}
           aria-hidden={isObscured}
           aria-label={isObscured ? undefined : NEXT_THEME_LABEL[siteTheme]}
           className={`flex touch-manipulation select-none items-start justify-end border-0 bg-transparent p-0 m-0 text-[var(--theme-hot)] opacity-55 transition-opacity duration-300 focus:outline-none ${

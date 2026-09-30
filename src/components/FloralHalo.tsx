@@ -6,10 +6,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   motion,
-  AnimatePresence,
-  useAnimationControls,
+  animate,
   useMotionValue,
   useSpring,
+  type MotionValue,
 } from 'motion/react';
 import compassLayer from '../../assets/halo/compass.svg?raw';
 import coreLayer from '../../assets/halo/core.svg?raw';
@@ -17,163 +17,176 @@ import innerFlowerLayer from '../../assets/halo/inner-flower.svg?raw';
 import outerSigilLayer from '../../assets/halo/outer-sigil.svg?raw';
 import waveRingLayer from '../../assets/halo/wave-ring.svg?raw';
 
+export interface HaloFocusPoint {
+  x: number;
+  y: number;
+}
+
 interface FloralHaloProps {
   className?: string;
   isPaused?: boolean;
   playIntro?: boolean;
+  /** Viewport point the halo turns toward and gently spins for (wide viewports only). */
+  focusPoint?: HaloFocusPoint | null;
 }
 
 interface ThemedSvgLayerProps {
   svg: string;
   className: string;
-  animate: ReturnType<typeof useAnimationControls>;
+  rotate: MotionValue<number>;
 }
 
-function ThemedSvgLayer({ svg, className, animate }: ThemedSvgLayerProps) {
+function ThemedSvgLayer({ svg, className, rotate }: ThemedSvgLayerProps) {
   return (
     <motion.div
-      animate={animate}
+      style={{ rotate }}
       className={`${className} text-[var(--theme-hot)] transition-colors duration-500 [&_svg]:h-full [&_svg]:w-full [&_svg]:block`}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 }
 
+const WIDE_VIEWPORT_QUERY = "(min-width: 1024px)";
+const SPIN_DOWN_DELAY_MS = 2000;
+const FOCUS_SPIN_SPEED = 0.45;
+const FOCUS_TILT_DEG = 12;
+
+// Degrees per second at full speed; negative values counter-rotate.
+const WAVE_DPS = 360 / 54;
+const OUTER_DPS = 360 / 32.4;
+const INNER_DPS = -360 / 19.8;
+const CORE_DPS = 360 / 10.8;
+const COMPASS_DPS = -360 / 8;
+
+function useIsWideViewport() {
+  const [isWide, setIsWide] = useState(
+    () => window.matchMedia(WIDE_VIEWPORT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia(WIDE_VIEWPORT_QUERY);
+    const update = () => setIsWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return isWide;
+}
+
 function FloralHalo({
   className = "",
   isPaused = false,
   playIntro = true,
+  focusPoint = null,
 }: FloralHaloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isWide = useIsWideViewport();
   const [isHovered, setIsHovered] = useState(false);
-  const [clickPulseKey, setClickPulseKey] = useState(0);
+  const [hasSettled, setHasSettled] = useState(false);
   const rawTiltX = useMotionValue(0);
   const rawTiltY = useMotionValue(0);
-  const tiltX = useSpring(rawTiltX, { stiffness: 80, damping: 24 });
-  const tiltY = useSpring(rawTiltY, { stiffness: 80, damping: 24 });
-  const rotationSpeed = isHovered ? 9.6 : 18; // seconds per full rotation
-  const waveControls = useAnimationControls();
-  const outerControls = useAnimationControls();
-  const innerControls = useAnimationControls();
-  const coreControls = useAnimationControls();
-  const compassControls = useAnimationControls();
+  const tiltX = useSpring(rawTiltX, { stiffness: 60, damping: 20 });
+  const tiltY = useSpring(rawTiltY, { stiffness: 60, damping: 20 });
+  const spinSpeed = useMotionValue(1);
+  const waveRotate = useMotionValue(0);
+  const outerRotate = useMotionValue(0);
+  const innerRotate = useMotionValue(0);
+  const coreRotate = useMotionValue(0);
+  const compassRotate = useMotionValue(0);
+  const isFocused = isWide && !isPaused && focusPoint !== null;
 
   useEffect(() => {
-    let frame: number | null = null;
-    let latestPointer = { x: 0, y: 0 };
+    if (!playIntro || hasSettled) return;
+    const timeout = window.setTimeout(() => setHasSettled(true), SPIN_DOWN_DELAY_MS);
+    return () => window.clearTimeout(timeout);
+  }, [playIntro, hasSettled]);
 
-    const updateTilt = () => {
-      if (!containerRef.current || isPaused) return;
-
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const dx = latestPointer.x - centerX;
-      const dy = latestPointer.y - centerY;
-      const maxTilt = 20;
-
-      rawTiltX.set(-(dy / 600) * maxTilt);
-      rawTiltY.set((dx / 600) * maxTilt);
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      latestPointer = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-
-      if (frame !== null) return;
-
-      frame = window.requestAnimationFrame(() => {
-        updateTilt();
-        frame = null;
-      });
-    };
-
+  useEffect(() => {
     if (isPaused) {
+      spinSpeed.stop();
+      spinSpeed.set(0);
+      return;
+    }
+
+    const target = !hasSettled ? 1 : isFocused ? FOCUS_SPIN_SPEED : 0;
+    const isSpeedingUp = target > spinSpeed.get();
+    const controls = animate(spinSpeed, target, {
+      duration: isSpeedingUp ? 0.8 : 1.5,
+      ease: isSpeedingUp ? "easeInOut" : "easeOut",
+    });
+    return () => controls.stop();
+  }, [hasSettled, isFocused, isPaused, spinSpeed]);
+
+  // Only runs frames while the halo is actually turning.
+  useEffect(() => {
+    const layers: [MotionValue<number>, number][] = [
+      [waveRotate, WAVE_DPS],
+      [outerRotate, OUTER_DPS],
+      [innerRotate, INNER_DPS],
+      [coreRotate, CORE_DPS],
+      [compassRotate, COMPASS_DPS],
+    ];
+    let frame: number | null = null;
+    let lastTime: number | null = null;
+
+    const tick = (time: number) => {
+      const speed = spinSpeed.get();
+      if (speed <= 0) {
+        frame = null;
+        lastTime = null;
+        return;
+      }
+
+      if (lastTime !== null) {
+        const elapsed = Math.min((time - lastTime) / 1000, 0.1);
+        for (const [rotation, degreesPerSecond] of layers) {
+          rotation.set((rotation.get() + degreesPerSecond * speed * elapsed) % 360);
+        }
+      }
+      lastTime = time;
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (frame === null && spinSpeed.get() > 0) {
+        frame = window.requestAnimationFrame(tick);
+      }
+    };
+
+    start();
+    const unsubscribe = spinSpeed.on("change", start);
+
+    return () => {
+      unsubscribe();
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+  }, [compassRotate, coreRotate, innerRotate, outerRotate, spinSpeed, waveRotate]);
+
+  useEffect(() => {
+    if (!isFocused || !focusPoint || !containerRef.current) {
       rawTiltX.set(0);
       rawTiltY.set(0);
       return;
     }
 
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    const rect = containerRef.current.getBoundingClientRect();
+    const dx = focusPoint.x - (rect.left + rect.width / 2);
+    const dy = focusPoint.y - (rect.top + rect.height / 2);
+    const distance = Math.hypot(dx, dy) || 1;
 
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      if (frame !== null) {
-        window.cancelAnimationFrame(frame);
-      }
-    };
-  }, [isPaused, rawTiltX, rawTiltY]);
+    rawTiltX.set(-(dy / distance) * FOCUS_TILT_DEG);
+    rawTiltY.set((dx / distance) * FOCUS_TILT_DEG);
+  }, [focusPoint, isFocused, rawTiltX, rawTiltY]);
 
   useEffect(() => {
-    if (isPaused) {
-      waveControls.stop();
-      outerControls.stop();
-      innerControls.stop();
-      coreControls.stop();
-      compassControls.stop();
-      return;
-    }
-
-    waveControls.start({
-      rotate: 360,
-      transition: {
-        repeat: Infinity,
-        ease: "linear",
-        duration: rotationSpeed * 3,
-      },
-    });
-    outerControls.start({
-      rotate: 360,
-      transition: {
-        repeat: Infinity,
-        ease: "linear",
-        duration: rotationSpeed * 1.8,
-      },
-    });
-    innerControls.start({
-      rotate: -360,
-      transition: {
-        repeat: Infinity,
-        ease: "linear",
-        duration: rotationSpeed * 1.1,
-      },
-    });
-    coreControls.start({
-      rotate: 360,
-      transition: {
-        repeat: Infinity,
-        ease: "linear",
-        duration: rotationSpeed * 0.6,
-      },
-    });
-    compassControls.start({
-      rotate: -360,
-      transition: {
-        repeat: Infinity,
-        ease: "linear",
-        duration: 8,
-      },
-    });
-  }, [
-    compassControls,
-    coreControls,
-    innerControls,
-    isPaused,
-    outerControls,
-    rotationSpeed,
-    waveControls,
-  ]);
+    if (!isWide || isPaused) setIsHovered(false);
+  }, [isPaused, isWide]);
 
   return (
     <div 
       ref={containerRef}
-      onMouseEnter={() => {
-        if (!isPaused) setIsHovered(true);
-      }}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`relative select-none pointer-events-auto flex items-center justify-center ${className}`}
+      className={`relative select-none pointer-events-none flex items-center justify-center ${className}`}
       style={{
         perspective: 1200,
       }}
@@ -219,10 +232,18 @@ function FloralHalo({
       )}
 
       {/* Interaction Stage */}
-      <motion.div
-        onClick={() => {
-          if (!isPaused) setClickPulseKey((key) => key + 1);
+      {/* Untransformed circle matching the outer sigil, so hover never grows or follows the tilt */}
+      <div
+        onPointerEnter={(event) => {
+          if (!isPaused && isWide && event.pointerType !== "touch") setIsHovered(true);
         }}
+        onPointerLeave={() => setIsHovered(false)}
+        className={`absolute z-40 w-[580px] h-[580px] rounded-full ${
+          isWide && !isPaused ? "pointer-events-auto" : "pointer-events-none"
+        }`}
+      />
+
+      <motion.div
         animate={{
           scale: isHovered && !isPaused ? 1.04 : 1.0,
         }}
@@ -232,26 +253,8 @@ function FloralHalo({
           willChange: "transform",
         }}
         transition={{ type: "spring", stiffness: 80, damping: 24 }}
-        className="w-[580px] h-[580px] flex items-center justify-center relative pixel-cursor-clickable"
+        className="w-[580px] h-[580px] flex items-center justify-center relative pointer-events-none"
       >
-        <AnimatePresence>
-          {clickPulseKey > 0 && (
-            <motion.div
-              key={clickPulseKey}
-              initial={{ opacity: 0.75, scale: 0.88 }}
-              animate={{ opacity: 0, scale: 1.22 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.95, ease: "easeOut" }}
-              className="pointer-events-none absolute inset-[-12%] z-[5] rounded-full"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(var(--theme-rgb), 0.42) 0%, rgba(var(--theme-rgb), 0.18) 42%, rgba(var(--theme-rgb), 0) 72%)",
-                boxShadow:
-                  "0 0 48px rgba(var(--theme-rgb), 0.55), 0 0 96px rgba(var(--theme-rgb), 0.32)",
-              }}
-            />
-          )}
-        </AnimatePresence>
         {/* Soft glowing background center aura */}
         <div className={`absolute w-[400px] h-[400px] bg-[var(--theme-hot)]/20 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'}`} />
 
@@ -272,7 +275,7 @@ function FloralHalo({
         />
 
         <ThemedSvgLayer
-          animate={waveControls}
+          rotate={waveRotate}
           svg={waveRingLayer}
           className="absolute w-[540px] h-[540px] pointer-events-none select-none"
         />
@@ -281,7 +284,7 @@ function FloralHalo({
         {/* OUTER CIRCLE: FLATTENED SIGIL LAYER */}
         {/* ========================================================== */}
         <ThemedSvgLayer
-          animate={outerControls}
+          rotate={outerRotate}
           svg={outerSigilLayer}
           className="absolute w-[580px] h-[580px] pointer-events-none select-none z-10"
         />
@@ -290,7 +293,7 @@ function FloralHalo({
         {/* INNER CIRCLE: FLATTENED GEOMETRIC FLOWER */}
         {/* ========================================================== */}
         <ThemedSvgLayer
-          animate={innerControls}
+          rotate={innerRotate}
           svg={innerFlowerLayer}
           className="absolute w-[320px] h-[320px] pointer-events-none select-none z-10"
         />
@@ -299,7 +302,7 @@ function FloralHalo({
         {/* COUNTER-ROTATING FLATTENED ROSE CORE */}
         {/* ========================================================== */}
         <ThemedSvgLayer
-          animate={coreControls}
+          rotate={coreRotate}
           svg={coreLayer}
           className="absolute w-[180px] h-[180px] pointer-events-none select-none z-[15]"
         />
@@ -308,7 +311,7 @@ function FloralHalo({
         {/* FLATTENED PRECISION AXIS COMPASS */}
         {/* ========================================================== */}
         <ThemedSvgLayer
-          animate={compassControls}
+          rotate={compassRotate}
           svg={compassLayer}
           className="absolute w-[72px] h-[72px] pointer-events-none select-none z-[25]"
         />

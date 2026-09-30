@@ -437,8 +437,7 @@ select {
   transition:
     background 500ms ease,
     box-shadow 500ms ease,
-    border-color 500ms ease,
-    transform 500ms ease;
+    border-color 500ms ease;
 }
 
 .liquid-glass-enter::before {
@@ -452,7 +451,7 @@ select {
   mix-blend-mode: screen;
 }
 
-.liquid-glass-enter:hover {
+button:hover > .liquid-glass-enter {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.52), rgba(var(--theme-light-rgb), 0.34) 42%, rgba(255, 255, 255, 0.4)),
     radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0) 36%),

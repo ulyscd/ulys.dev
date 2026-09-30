@@ -7,7 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { Maximize2, X } from "lucide-react";
 import { CURATED_PROJECTS, ProjectCurated } from "./data/projects";
-import FloralHalo from "./components/FloralHalo";
+import FloralHalo, { type HaloFocusPoint } from "./components/FloralHalo";
 import PetalRain from "./components/PetalRain";
 import PixelGrid from "./components/PixelGrid";
 import TopRightAsciiArt, { BlindReveal } from "./components/TopRightAsciiArt";
@@ -84,6 +84,16 @@ export default function App() {
   const [burstActive, setBurstActive] = useState(false);
   const [siteTheme, setSiteTheme] = useState<SiteTheme>("navy");
   const [themePulseKey, setThemePulseKey] = useState(0);
+  const [haloFocus, setHaloFocus] = useState<HaloFocusPoint | null>(null);
+
+  const focusHaloOn = (target: HTMLElement | null) => {
+    if (!target) {
+      setHaloFocus(null);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    setHaloFocus({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+  };
 
   useEffect(() => {
     const unsubscribe = loadProgress.on("change", (value) => {
@@ -208,6 +218,7 @@ export default function App() {
   const handleIntroduceClick = () => {
     setShowCompositions(true);
     setBurstActive(true);
+    setHaloFocus(null);
 
     // Deactivate light ray burst after simulation completes
     setTimeout(() => {
@@ -232,6 +243,7 @@ export default function App() {
         <TopRightAsciiArt
           siteTheme={siteTheme}
           onCycleTheme={handleThemeCycle}
+          onHoverChange={focusHaloOn}
           isObscured={showCompositions}
           playIntro
         />
@@ -394,6 +406,7 @@ export default function App() {
               className="w-full h-full scale-[0.88] sm:scale-[0.95] md:scale-[1.05] lg:scale-[1.6]"
               isPaused={showCompositions}
               playIntro={!loading}
+              focusPoint={haloFocus}
             />
           </div>
         </div>
@@ -444,24 +457,33 @@ export default function App() {
             <div className="relative">
               <motion.button
                 onClick={handleIntroduceClick}
-                whileHover={{
-                  y: -3,
-                  boxShadow:
-                    "0 16px 36px rgba(var(--theme-rgb), 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+                onPointerEnter={(event) => {
+                  if (event.pointerType !== "touch") focusHaloOn(event.currentTarget);
                 }}
-                whileTap={{
-                  scale: 0.98,
-                  y: 1,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 220,
-                  damping: 24,
-                  mass: 0.6,
-                }}
-                className="liquid-glass-enter pixel-bevel-border relative z-10 w-full py-4 rounded-none text-xs font-pixel tracking-widest text-[var(--theme-hot)] flex items-center justify-center space-x-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                onPointerLeave={() => focusHaloOn(null)}
+                initial="rest"
+                animate="rest"
+                whileHover="hover"
+                whileTap="tap"
+                className="relative z-10 block w-full p-0 border-0 bg-transparent rounded-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-hot)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
-                <span>[ ENTER ]</span>
+                {/* The button stays put as the hit area; only this visual layer lifts */}
+                <motion.span
+                  variants={{
+                    rest: { y: 0, scale: 1 },
+                    hover: { y: -3, scale: 1 },
+                    tap: { y: 1, scale: 0.98 },
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 220,
+                    damping: 24,
+                    mass: 0.6,
+                  }}
+                  className="liquid-glass-enter pixel-bevel-border pointer-events-none relative w-full py-4 rounded-none text-xs font-pixel tracking-widest text-[var(--theme-hot)] flex items-center justify-center space-x-2"
+                >
+                  <span>[ ENTER ]</span>
+                </motion.span>
               </motion.button>
             </div>
           </div>
